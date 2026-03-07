@@ -1,0 +1,23 @@
+﻿@page "/admin"
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h3>Admin Area</h3>
+        <p>If you can see this, RBAC is working.</p>
+    </Authorized>
+
+    <NotAuthorized>
+        <h3>Not authorized</h3>
+        <p>You must be an Admin to view this page.</p>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var state = await (AuthStateTask ?? Task.FromResult(new AuthenticationState(new System.Security.Claims.ClaimsPrincipal())));
+        Console.WriteLine($"IsAuthenticated: {state.User.Identity?.IsAuthenticated}");
+        Console.WriteLine($"IsInRole(Admin): {state.User.IsInRole("Admin")}");
+    }
+}
