@@ -61,5 +61,5 @@ jobs:
           script: |
             cd /docker/secure-workflow-system
             echo "IMAGE_SHA=${{ env.IMAGE_SHA }}" > myportfolio.env
-            docker compose -p secure-workflow-system --env-file secure-workflow-system.env pull
-            docker compose -p secure-workflow-system --env-file secure-workflow-system.env up -d
+            docker compose -p workflow --env-file workflow.env pull
+            docker compose -p workflow --env-file workflow.env up -d
