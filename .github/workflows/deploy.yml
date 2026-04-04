@@ -60,5 +60,6 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
             cd /docker/secure-workflow-system
-            docker compose pull
-            docker compose up -d
+            echo "IMAGE_SHA=${{ env.IMAGE_SHA }}" > myportfolio.env
+            docker compose -p secure-workflow-system --env-file secure-workflow-system.env pull
+            docker compose -p secure-workflow-system --env-file secure-workflow-system.env up -d
