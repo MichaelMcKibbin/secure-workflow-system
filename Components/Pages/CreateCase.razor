@@ -1,0 +1,79 @@
+@page "/cases/create"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager Navigation
+@inject secure_workflow_system.Services.ICaseService CaseService
+
+<PageTitle>Create Case</PageTitle>
+
+<h1>Create Case</h1>
+
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@_errorMessage</div>
+}
+
+<EditForm Model="_model" OnValidSubmit="HandleSubmitAsync" FormName="CreateCaseForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="title" class="form-label">Title</label>
+        <InputText id="title" class="form-control" @bind-Value="_model.Title" />
+    </div>
+
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <InputTextArea id="description" class="form-control" @bind-Value="_model.Description" rows="5" />
+    </div>
+
+    <button class="btn btn-primary" type="submit" disabled="@_isSubmitting">@(_isSubmitting ? "Creating..." : "Create Case")</button>
+</EditForm>
+
+@code {
+    private readonly CreateCaseInputModel _model = new();
+    private bool _isSubmitting;
+    private string? _errorMessage;
+
+    private async Task HandleSubmitAsync()
+    {
+        _errorMessage = null;
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            _errorMessage = "Unable to determine the current user. Please sign in again.";
+            return;
+        }
+
+        try
+        {
+            _isSubmitting = true;
+            var createdCase = await CaseService.CreateCaseAsync(userId, _model.Title, _model.Description);
+            Navigation.NavigateTo($"/cases/{createdCase.Id}");
+        }
+        catch
+        {
+            _errorMessage = "Unable to create the case right now. Please try again.";
+        }
+        finally
+        {
+            _isSubmitting = false;
+        }
+    }
+
+    private sealed class CreateCaseInputModel
+    {
+        [Required]
+        [StringLength(200)]
+        public string Title { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(4000)]
+        public string Description { get; set; } = string.Empty;
+    }
+}

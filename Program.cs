@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using secure_workflow_system.Components;
 using secure_workflow_system.Components.Account;
 using secure_workflow_system.Data;
+using secure_workflow_system.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,12 +55,16 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 .AddDefaultTokenProviders();
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+builder.Services.AddScoped<ICaseService, CaseService>();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
+
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
 

@@ -1,0 +1,73 @@
+@page "/cases"
+@attribute [Authorize]
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject secure_workflow_system.Services.ICaseService CaseService
+
+<PageTitle>My Cases</PageTitle>
+
+<h1>My Cases</h1>
+
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@_errorMessage</div>
+}
+else if (_cases is null)
+{
+    <p>Loading...</p>
+}
+else if (_cases.Count == 0)
+{
+    <p>You have no cases yet.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Title</th>
+                <th>Status</th>
+                <th>Created (UTC)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var workflowCase in _cases)
+            {
+                <tr>
+                    <td><a href="@($"/cases/{workflowCase.Id}")">@workflowCase.Id</a></td>
+                    <td>@workflowCase.Title</td>
+                    <td>@workflowCase.Status</td>
+                    <td>@workflowCase.CreatedAtUtc.ToString("u")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IReadOnlyList<secure_workflow_system.Data.Case>? _cases;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            _errorMessage = "Unable to determine the current user.";
+            _cases = [];
+            return;
+        }
+
+        try
+        {
+            _cases = await CaseService.GetCasesForUserAsync(userId);
+        }
+        catch
+        {
+            _errorMessage = "Unable to load your cases right now. Please try again.";
+            _cases = [];
+        }
+    }
+}
