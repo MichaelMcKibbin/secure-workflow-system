@@ -29,7 +29,15 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
     {
         return await dbContext.Cases
             .AsNoTracking()
-            .Where(c => c.CreatedByUserId == userId)
+            .Where(c => c.CreatedByUserId == userId || c.AssignedToUserId == userId)
+            .OrderByDescending(c => c.CreatedAtUtc)
+            .ToListAsync();
+    }
+
+    public async Task<IReadOnlyList<Case>> GetAllCasesAsync()
+    {
+        return await dbContext.Cases
+            .AsNoTracking()
             .OrderByDescending(c => c.CreatedAtUtc)
             .ToListAsync();
     }
@@ -38,6 +46,29 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
     {
         return await dbContext.Cases
             .AsNoTracking()
-            .FirstOrDefaultAsync(c => c.Id == caseId && c.CreatedByUserId == userId);
+            .FirstOrDefaultAsync(c => c.Id == caseId && (c.CreatedByUserId == userId || c.AssignedToUserId == userId));
+    }
+
+    public async Task<Case?> GetCaseByIdAsync(int caseId)
+    {
+        return await dbContext.Cases
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == caseId);
+    }
+
+    public async Task<bool> UpdateCaseStatusAndAssignmentAsync(int caseId, string status, string? assignedToUserId)
+    {
+        var workflowCase = await dbContext.Cases.FirstOrDefaultAsync(c => c.Id == caseId);
+        if (workflowCase is null)
+        {
+            return false;
+        }
+
+        workflowCase.Status = status.Trim();
+        workflowCase.AssignedToUserId = string.IsNullOrWhiteSpace(assignedToUserId) ? null : assignedToUserId;
+        workflowCase.UpdatedAtUtc = DateTime.UtcNow;
+
+        await dbContext.SaveChangesAsync();
+        return true;
     }
 }

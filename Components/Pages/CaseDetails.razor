@@ -1,6 +1,10 @@
 @page "/cases/{Id:int}"
-@attribute [Authorize]
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Identity
+@attribute [Authorize(Policy = "CanViewCases")]
 @inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<secure_workflow_system.Data.ApplicationUser> UserManager
 @inject secure_workflow_system.Services.ICaseService CaseService
 
 <PageTitle>Case Details</PageTitle>
@@ -11,7 +15,13 @@
 {
     <div class="alert alert-danger" role="alert">@_errorMessage</div>
 }
-else if (_isLoading)
+
+@if (!string.IsNullOrEmpty(_successMessage))
+{
+    <div class="alert alert-success" role="alert">@_successMessage</div>
+}
+
+@if (_isLoading)
 {
     <p>Loading...</p>
 }
@@ -34,12 +44,50 @@ else
         <dt class="col-sm-3">Status</dt>
         <dd class="col-sm-9">@_case.Status</dd>
 
+        <dt class="col-sm-3">Created By</dt>
+        <dd class="col-sm-9">@_case.CreatedByUserId</dd>
+
+        <dt class="col-sm-3">Assigned To</dt>
+        <dd class="col-sm-9">@(_case.AssignedToUserId ?? "Unassigned")</dd>
+
         <dt class="col-sm-3">Created (UTC)</dt>
         <dd class="col-sm-9">@_case.CreatedAtUtc.ToString("u")</dd>
 
         <dt class="col-sm-3">Updated (UTC)</dt>
         <dd class="col-sm-9">@_case.UpdatedAtUtc.ToString("u")</dd>
     </dl>
+
+    @if (_canManageCases)
+    {
+        <h3>Manage Case</h3>
+        <EditForm Model="_manageModel" OnValidSubmit="HandleManageSubmitAsync" FormName="ManageCaseForm">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label" for="status">Status</label>
+                <InputSelect id="status" class="form-select" @bind-Value="_manageModel.Status">
+                    @foreach (var status in _allowedStatuses)
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label" for="assignedTo">Assigned To</label>
+                <InputSelect id="assignedTo" class="form-select" @bind-Value="_manageModel.AssignedToUserId">
+                    <option value="">Unassigned</option>
+                    @foreach (var user in _assignableUsers)
+                    {
+                        <option value="@user.Id">@user.Display</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <button type="submit" class="btn btn-primary" disabled="@_isSaving">@(_isSaving ? "Saving..." : "Save")</button>
+        </EditForm>
+    }
 }
 
 @code {
@@ -47,17 +95,26 @@ else
 
     private secure_workflow_system.Data.Case? _case;
     private bool _isLoading = true;
+    private bool _isSaving;
+    private bool _canManageCases;
+    private string? _currentUserId;
     private string? _errorMessage;
+    private string? _successMessage;
+    private readonly ManageCaseInputModel _manageModel = new();
+    private readonly List<UserOption> _assignableUsers = [];
+    private static readonly string[] _allowedStatuses = ["New", "Assigned", "In Progress", "Resolved", "Closed"];
 
     protected override async Task OnParametersSetAsync()
     {
         _isLoading = true;
         _errorMessage = null;
+        _successMessage = null;
 
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var user = authState.User;
+        _currentUserId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
-        if (string.IsNullOrWhiteSpace(userId))
+        if (string.IsNullOrWhiteSpace(_currentUserId))
         {
             _errorMessage = "Unable to determine the current user.";
             _case = null;
@@ -65,9 +122,20 @@ else
             return;
         }
 
+        _canManageCases = user.IsInRole("Staff") || user.IsInRole("Admin");
+
         try
         {
-            _case = await CaseService.GetCaseByIdForUserAsync(Id, userId);
+            _case = _canManageCases
+                ? await CaseService.GetCaseByIdAsync(Id)
+                : await CaseService.GetCaseByIdForUserAsync(Id, _currentUserId);
+
+            if (_case is not null && _canManageCases)
+            {
+                _manageModel.Status = string.IsNullOrWhiteSpace(_case.Status) ? "New" : _case.Status;
+                _manageModel.AssignedToUserId = _case.AssignedToUserId;
+                await LoadAssignableUsersAsync();
+            }
         }
         catch
         {
@@ -79,4 +147,73 @@ else
             _isLoading = false;
         }
     }
+
+    private async Task LoadAssignableUsersAsync()
+    {
+        _assignableUsers.Clear();
+
+        var userRoleUsers = await UserManager.GetUsersInRoleAsync("User");
+        var staffUsers = await UserManager.GetUsersInRoleAsync("Staff");
+        var adminUsers = await UserManager.GetUsersInRoleAsync("Admin");
+
+        foreach (var user in userRoleUsers
+            .Concat(staffUsers)
+            .Concat(adminUsers)
+            .GroupBy(u => u.Id)
+            .Select(g => g.First())
+            .OrderBy(u => u.Email ?? u.UserName ?? u.Id))
+        {
+            _assignableUsers.Add(new UserOption(user.Id, user.Email ?? user.UserName ?? user.Id));
+        }
+    }
+
+    private async Task HandleManageSubmitAsync()
+    {
+        _errorMessage = null;
+        _successMessage = null;
+
+        if (!_canManageCases || _case is null)
+        {
+            _errorMessage = "You are not authorized to update this case.";
+            return;
+        }
+
+        if (!_allowedStatuses.Contains(_manageModel.Status))
+        {
+            _errorMessage = "Invalid status selected.";
+            return;
+        }
+
+        try
+        {
+            _isSaving = true;
+            var updated = await CaseService.UpdateCaseStatusAndAssignmentAsync(_case.Id, _manageModel.Status, _manageModel.AssignedToUserId);
+            if (!updated)
+            {
+                _errorMessage = "Case not found.";
+                return;
+            }
+
+            _case = await CaseService.GetCaseByIdAsync(_case.Id);
+            _successMessage = "Case updated successfully.";
+        }
+        catch
+        {
+            _errorMessage = "Unable to update the case right now. Please try again.";
+        }
+        finally
+        {
+            _isSaving = false;
+        }
+    }
+
+    private sealed class ManageCaseInputModel
+    {
+        [Required]
+        public string Status { get; set; } = "New";
+
+        public string? AssignedToUserId { get; set; }
+    }
+
+    private sealed record UserOption(string Id, string Display);
 }

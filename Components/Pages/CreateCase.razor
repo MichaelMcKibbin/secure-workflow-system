@@ -1,7 +1,7 @@
 @page "/cases/create"
 @rendermode InteractiveServer
 @using System.ComponentModel.DataAnnotations
-@attribute [Authorize]
+@attribute [Authorize(Policy = "CanCreateCase")]
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager Navigation
 @inject secure_workflow_system.Services.ICaseService CaseService

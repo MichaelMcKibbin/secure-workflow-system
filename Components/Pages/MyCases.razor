@@ -1,11 +1,11 @@
 @page "/cases"
-@attribute [Authorize]
+@attribute [Authorize(Policy = "CanViewCases")]
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject secure_workflow_system.Services.ICaseService CaseService
 
-<PageTitle>My Cases</PageTitle>
+<PageTitle>Cases</PageTitle>
 
-<h1>My Cases</h1>
+<h1>@(_isStaffOrAdmin ? "All Cases" : "My Cases")</h1>
 
 @if (!string.IsNullOrEmpty(_errorMessage))
 {
@@ -17,7 +17,7 @@ else if (_cases is null)
 }
 else if (_cases.Count == 0)
 {
-    <p>You have no cases yet.</p>
+    <p>No cases found.</p>
 }
 else
 {
@@ -47,11 +47,13 @@ else
 @code {
     private IReadOnlyList<secure_workflow_system.Data.Case>? _cases;
     private string? _errorMessage;
+    private bool _isStaffOrAdmin;
 
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var userId = authState.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var user = authState.User;
+        var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
 
         if (string.IsNullOrWhiteSpace(userId))
         {
@@ -60,13 +62,17 @@ else
             return;
         }
 
+        _isStaffOrAdmin = user.IsInRole("Staff") || user.IsInRole("Admin");
+
         try
         {
-            _cases = await CaseService.GetCasesForUserAsync(userId);
+            _cases = _isStaffOrAdmin
+                ? await CaseService.GetAllCasesAsync()
+                : await CaseService.GetCasesForUserAsync(userId);
         }
         catch
         {
-            _errorMessage = "Unable to load your cases right now. Please try again.";
+            _errorMessage = "Unable to load cases right now. Please try again.";
             _cases = [];
         }
     }

@@ -26,4 +26,8 @@ public class Case
     public string CreatedByUserId { get; set; } = string.Empty;
 
     public ApplicationUser CreatedByUser { get; set; } = default!;
+
+    public string? AssignedToUserId { get; set; }
+
+    public ApplicationUser? AssignedToUser { get; set; }
 }

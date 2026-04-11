@@ -27,6 +27,11 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAdmin", p => p.RequireRole("Admin"));
     options.AddPolicy("RequireStaff", p => p.RequireRole("Admin", "Staff"));
+
+    options.AddPolicy("CanCreateCase", p => p.RequireRole("User", "Admin"));
+    options.AddPolicy("CanViewCases", p => p.RequireRole("User", "Staff", "Admin"));
+    options.AddPolicy("CanManageCases", p => p.RequireRole("Staff", "Admin"));
+    options.AddPolicy("CanManageUsers", p => p.RequireRole("Admin"));
 });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")

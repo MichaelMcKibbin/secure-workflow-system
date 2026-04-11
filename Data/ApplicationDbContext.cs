@@ -22,7 +22,13 @@ namespace secure_workflow_system.Data
                     .HasForeignKey(c => c.CreatedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
 
+                entity.HasOne(c => c.AssignedToUser)
+                    .WithMany()
+                    .HasForeignKey(c => c.AssignedToUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
                 entity.HasIndex(c => new { c.CreatedByUserId, c.CreatedAtUtc });
+                entity.HasIndex(c => c.AssignedToUserId);
             });
         }
     }
