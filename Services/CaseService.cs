@@ -13,7 +13,7 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
         {
             Title = title.Trim(),
             Description = description.Trim(),
-            Status = "New",
+            Status = WorkflowState.New,
             CreatedAtUtc = utcNow,
             UpdatedAtUtc = utcNow,
             CreatedByUserId = userId
@@ -64,7 +64,12 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
             return false;
         }
 
-        workflowCase.Status = status.Trim();
+        if (!Enum.TryParse<WorkflowState>(status.Trim(), ignoreCase: true, out var newStatus))
+        {
+            return false;
+        }
+
+        workflowCase.Status = newStatus;
         workflowCase.AssignedToUserId = string.IsNullOrWhiteSpace(assignedToUserId) ? null : assignedToUserId;
         workflowCase.UpdatedAtUtc = DateTime.UtcNow;
 
@@ -80,16 +85,25 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
             return false;
         }
 
-        var newStatus = status.Trim();
+        if (!Enum.TryParse<WorkflowState>(status.Trim(), ignoreCase: true, out var newStatus))
+        {
+            return false;
+        }
+
         var statusChanged = workflowCase.Status != newStatus;
+
+        if (statusChanged && !Case.IsValidTransition(workflowCase.Status, newStatus))
+        {
+            return false;
+        }
 
         if (statusChanged)
         {
             var history = new CaseStatusHistory
             {
                 CaseId = caseId,
-                OldStatus = workflowCase.Status,
-                NewStatus = newStatus,
+                OldStatus = workflowCase.Status.ToString(),
+                NewStatus = newStatus.ToString(),
                 ChangedByUserId = changedByUserId,
                 ChangedAtUtc = DateTime.UtcNow
             };

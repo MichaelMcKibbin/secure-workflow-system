@@ -42,7 +42,7 @@ else
         <dd class="col-sm-9">@_case.Description</dd>
 
         <dt class="col-sm-3">Status</dt>
-        <dd class="col-sm-9">@_case.Status</dd>
+        <dd class="col-sm-9">@FormatStatus(_case.Status)</dd>
 
         <dt class="col-sm-3">Created By</dt>
         <dd class="col-sm-9">@_case.CreatedByUserId</dd>
@@ -67,9 +67,9 @@ else
             <div class="mb-3">
                 <label class="form-label" for="status">Status</label>
                 <InputSelect id="status" class="form-select" @bind-Value="_manageModel.Status">
-                    @foreach (var status in _allowedStatuses)
+                    @foreach (var status in GetValidTransitions())
                     {
-                        <option value="@status">@status</option>
+                        <option value="@status.ToString()">@FormatStatus(status)</option>
                     }
                 </InputSelect>
             </div>
@@ -109,8 +109,8 @@ else
                 @foreach (var history in _statusHistory)
                 {
                     <tr>
-                        <td>@history.OldStatus</td>
-                        <td>@history.NewStatus</td>
+                        <td>@FormatStatus(history.OldStatus)</td>
+                        <td>@FormatStatus(history.NewStatus)</td>
                         <td>@history.ChangedByUserId</td>
                         <td>@history.ChangedAtUtc.ToString("u")</td>
                     </tr>
@@ -133,7 +133,6 @@ else
     private readonly ManageCaseInputModel _manageModel = new();
     private readonly List<UserOption> _assignableUsers = [];
     private readonly List<secure_workflow_system.Data.CaseStatusHistory> _statusHistory = [];
-    private static readonly string[] _allowedStatuses = ["New", "Assigned", "In Progress", "Resolved", "Closed"];
 
     protected override async Task OnParametersSetAsync()
     {
@@ -165,7 +164,7 @@ else
             {
                 if (_canManageCases)
                 {
-                    _manageModel.Status = string.IsNullOrWhiteSpace(_case.Status) ? "New" : _case.Status;
+                    _manageModel.Status = _case.Status.ToString();
                     _manageModel.AssignedToUserId = _case.AssignedToUserId;
                     await LoadAssignableUsersAsync();
                 }
@@ -216,33 +215,27 @@ else
             return;
         }
 
-        if (!_allowedStatuses.Contains(_manageModel.Status))
-        {
-            _errorMessage = "Invalid status selected.";
-            return;
-        }
-
         try
         {
             _isSaving = true;
             var updated = await CaseService.UpdateCaseStatusAndAssignmentAsync(
-                _case.Id, 
-                _manageModel.Status, 
+                _case.Id,
+                _manageModel.Status,
                 _manageModel.AssignedToUserId,
                 _currentUserId!);
-            
+
             if (!updated)
             {
-                _errorMessage = "Case not found.";
+                _errorMessage = "Case not found or invalid status transition.";
                 return;
             }
 
             _case = await CaseService.GetCaseByIdAsync(_case.Id);
-            
+
             _statusHistory.Clear();
             var history = await CaseService.GetCaseStatusHistoryAsync(_case.Id);
             _statusHistory.AddRange(history);
-            
+
             _successMessage = "Case updated successfully.";
         }
         catch
@@ -259,15 +252,36 @@ else
     {
         if (_case == null)
             return string.Empty;
-        
+
         DateTime dateTime = _case.UpdatedAtUtc ?? _case.CreatedAtUtc;
         return dateTime.ToString("u");
+    }
+
+    private string FormatStatus(secure_workflow_system.Data.WorkflowState status)
+    {
+        return status.ToString().Replace("InProgress", "In Progress");
+    }
+
+    private string FormatStatus(string status)
+    {
+        return status.Replace("InProgress", "In Progress");
+    }
+
+    private List<secure_workflow_system.Data.WorkflowState> GetValidTransitions()
+    {
+        if (_case is null)
+            return new List<secure_workflow_system.Data.WorkflowState>();
+
+        return Enum.GetValues(typeof(secure_workflow_system.Data.WorkflowState))
+            .Cast<secure_workflow_system.Data.WorkflowState>()
+            .Where(state => secure_workflow_system.Data.Case.IsValidTransition(_case.Status, state))
+            .ToList();
     }
 
     private sealed class ManageCaseInputModel
     {
         [Required]
-        public string Status { get; set; } = "New";
+        public string Status { get; set; } = secure_workflow_system.Data.WorkflowState.New.ToString();
 
         public string? AssignedToUserId { get; set; }
     }

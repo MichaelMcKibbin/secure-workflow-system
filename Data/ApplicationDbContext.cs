@@ -16,7 +16,10 @@ namespace secure_workflow_system.Data
             {
                 entity.Property(c => c.Title).HasMaxLength(200).IsRequired();
                 entity.Property(c => c.Description).HasMaxLength(4000).IsRequired();
-                entity.Property(c => c.Status).HasMaxLength(50).IsRequired();
+                entity.Property(c => c.Status)
+                    .HasConversion<string>()
+                    .HasMaxLength(50)
+                    .IsRequired();
 
                 entity.HasOne(c => c.CreatedByUser)
                     .WithMany()

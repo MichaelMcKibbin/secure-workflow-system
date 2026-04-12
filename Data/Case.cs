@@ -15,8 +15,7 @@ public class Case
     public string Description { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(50)]
-    public string Status { get; set; } = "New";
+    public WorkflowState Status { get; set; } = WorkflowState.New;
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
@@ -30,4 +29,20 @@ public class Case
     public string? AssignedToUserId { get; set; }
 
     public ApplicationUser? AssignedToUser { get; set; }
+
+    /// <summary>
+    /// Validates if a transition from one workflow state to another is allowed.
+    /// </summary>
+    public static bool IsValidTransition(WorkflowState from, WorkflowState to)
+    {
+        return (from, to) switch
+        {
+            (WorkflowState.New, WorkflowState.Assigned) => true,
+            (WorkflowState.Assigned, WorkflowState.InProgress) => true,
+            (WorkflowState.InProgress, WorkflowState.Resolved) => true,
+            (WorkflowState.Resolved, WorkflowState.Closed) => true,
+            (WorkflowState.Resolved, WorkflowState.InProgress) => true,
+            _ => false
+        };
+    }
 }
