@@ -18,9 +18,9 @@ public class Case
     [StringLength(50)]
     public string Status { get; set; } = "New";
 
-    public DateTime CreatedAtUtc { get; set; }
+    public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;
 
-    public DateTime UpdatedAtUtc { get; set; }
+    public DateTime? UpdatedAtUtc { get; set; }
 
     [Required]
     public string CreatedByUserId { get; set; } = string.Empty;

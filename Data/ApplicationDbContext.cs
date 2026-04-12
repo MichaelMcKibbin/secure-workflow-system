@@ -6,6 +6,7 @@ namespace secure_workflow_system.Data
     public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : IdentityDbContext<ApplicationUser>(options)
     {
         public DbSet<Case> Cases => Set<Case>();
+        public DbSet<CaseStatusHistory> CaseStatusHistories => Set<CaseStatusHistory>();
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -29,6 +30,26 @@ namespace secure_workflow_system.Data
 
                 entity.HasIndex(c => new { c.CreatedByUserId, c.CreatedAtUtc });
                 entity.HasIndex(c => c.AssignedToUserId);
+            });
+
+            builder.Entity<CaseStatusHistory>(entity =>
+            {
+                entity.Property(h => h.OldStatus).HasMaxLength(50).IsRequired();
+                entity.Property(h => h.NewStatus).HasMaxLength(50).IsRequired();
+
+                entity.HasOne(h => h.Case)
+                    .WithMany()
+                    .HasForeignKey(h => h.CaseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(h => h.ChangedByUser)
+                    .WithMany()
+                    .HasForeignKey(h => h.ChangedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasIndex(h => h.CaseId);
+                entity.HasIndex(h => h.ChangedByUserId);
+                entity.HasIndex(h => new { h.CaseId, h.ChangedAtUtc });
             });
         }
     }

@@ -10,4 +10,6 @@ public interface ICaseService
     Task<Case?> GetCaseByIdForUserAsync(int caseId, string userId);
     Task<Case?> GetCaseByIdAsync(int caseId);
     Task<bool> UpdateCaseStatusAndAssignmentAsync(int caseId, string status, string? assignedToUserId);
+    Task<bool> UpdateCaseStatusAndAssignmentAsync(int caseId, string status, string? assignedToUserId, string changedByUserId);
+    Task<IReadOnlyList<CaseStatusHistory>> GetCaseStatusHistoryAsync(int caseId);
 }

@@ -71,4 +71,45 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
         await dbContext.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> UpdateCaseStatusAndAssignmentAsync(int caseId, string status, string? assignedToUserId, string changedByUserId)
+    {
+        var workflowCase = await dbContext.Cases.FirstOrDefaultAsync(c => c.Id == caseId);
+        if (workflowCase is null)
+        {
+            return false;
+        }
+
+        var newStatus = status.Trim();
+        var statusChanged = workflowCase.Status != newStatus;
+
+        if (statusChanged)
+        {
+            var history = new CaseStatusHistory
+            {
+                CaseId = caseId,
+                OldStatus = workflowCase.Status,
+                NewStatus = newStatus,
+                ChangedByUserId = changedByUserId,
+                ChangedAtUtc = DateTime.UtcNow
+            };
+            dbContext.CaseStatusHistories.Add(history);
+        }
+
+        workflowCase.Status = newStatus;
+        workflowCase.AssignedToUserId = string.IsNullOrWhiteSpace(assignedToUserId) ? null : assignedToUserId;
+        workflowCase.UpdatedAtUtc = DateTime.UtcNow;
+
+        await dbContext.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<IReadOnlyList<CaseStatusHistory>> GetCaseStatusHistoryAsync(int caseId)
+    {
+        return await dbContext.CaseStatusHistories
+            .AsNoTracking()
+            .Where(h => h.CaseId == caseId)
+            .OrderByDescending(h => h.ChangedAtUtc)
+            .ToListAsync();
+    }
 }

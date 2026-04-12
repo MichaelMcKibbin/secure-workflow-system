@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using secure_workflow_system.Data;
@@ -11,9 +12,11 @@ using secure_workflow_system.Data;
 namespace secure_workflow_system.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260412185647_MakeUpdatedAtNullable")]
+    partial class MakeUpdatedAtNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -273,7 +276,7 @@ namespace secure_workflow_system.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<DateTime?>("UpdatedAtUtc")
+                    b.Property<DateTime>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -283,45 +286,6 @@ namespace secure_workflow_system.Migrations
                     b.HasIndex("CreatedByUserId", "CreatedAtUtc");
 
                     b.ToTable("Cases");
-                });
-
-            modelBuilder.Entity("secure_workflow_system.Data.CaseStatusHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CaseId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("ChangedAtUtc")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("ChangedByUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("NewStatus")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.Property<string>("OldStatus")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CaseId");
-
-                    b.HasIndex("ChangedByUserId");
-
-                    b.HasIndex("CaseId", "ChangedAtUtc");
-
-                    b.ToTable("CaseStatusHistories");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -442,25 +406,6 @@ namespace secure_workflow_system.Migrations
                     b.Navigation("AssignedToUser");
 
                     b.Navigation("CreatedByUser");
-                });
-
-            modelBuilder.Entity("secure_workflow_system.Data.CaseStatusHistory", b =>
-                {
-                    b.HasOne("secure_workflow_system.Data.Case", "Case")
-                        .WithMany()
-                        .HasForeignKey("CaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("secure_workflow_system.Data.ApplicationUser", "ChangedByUser")
-                        .WithMany()
-                        .HasForeignKey("ChangedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Case");
-
-                    b.Navigation("ChangedByUser");
                 });
 #pragma warning restore 612, 618
         }

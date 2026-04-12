@@ -54,7 +54,7 @@ else
         <dd class="col-sm-9">@_case.CreatedAtUtc.ToString("u")</dd>
 
         <dt class="col-sm-3">Updated (UTC)</dt>
-        <dd class="col-sm-9">@_case.UpdatedAtUtc.ToString("u")</dd>
+        <dd class="col-sm-9">@FormatUpdatedTime()</dd>
     </dl>
 
     @if (_canManageCases)
@@ -88,6 +88,36 @@ else
             <button type="submit" class="btn btn-primary" disabled="@_isSaving">@(_isSaving ? "Saving..." : "Save")</button>
         </EditForm>
     }
+
+    <h3 class="mt-4">Status History</h3>
+    @if (_statusHistory.Count == 0)
+    {
+        <p><em>No status changes recorded yet.</em></p>
+    }
+    else
+    {
+        <table class="table table-sm table-striped">
+            <thead>
+                <tr>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Changed By</th>
+                    <th>Changed At (UTC)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var history in _statusHistory)
+                {
+                    <tr>
+                        <td>@history.OldStatus</td>
+                        <td>@history.NewStatus</td>
+                        <td>@history.ChangedByUserId</td>
+                        <td>@history.ChangedAtUtc.ToString("u")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 }
 
 @code {
@@ -102,6 +132,7 @@ else
     private string? _successMessage;
     private readonly ManageCaseInputModel _manageModel = new();
     private readonly List<UserOption> _assignableUsers = [];
+    private readonly List<secure_workflow_system.Data.CaseStatusHistory> _statusHistory = [];
     private static readonly string[] _allowedStatuses = ["New", "Assigned", "In Progress", "Resolved", "Closed"];
 
     protected override async Task OnParametersSetAsync()
@@ -130,11 +161,18 @@ else
                 ? await CaseService.GetCaseByIdAsync(Id)
                 : await CaseService.GetCaseByIdForUserAsync(Id, _currentUserId);
 
-            if (_case is not null && _canManageCases)
+            if (_case is not null)
             {
-                _manageModel.Status = string.IsNullOrWhiteSpace(_case.Status) ? "New" : _case.Status;
-                _manageModel.AssignedToUserId = _case.AssignedToUserId;
-                await LoadAssignableUsersAsync();
+                if (_canManageCases)
+                {
+                    _manageModel.Status = string.IsNullOrWhiteSpace(_case.Status) ? "New" : _case.Status;
+                    _manageModel.AssignedToUserId = _case.AssignedToUserId;
+                    await LoadAssignableUsersAsync();
+                }
+
+                _statusHistory.Clear();
+                var history = await CaseService.GetCaseStatusHistoryAsync(_case.Id);
+                _statusHistory.AddRange(history);
             }
         }
         catch
@@ -187,7 +225,12 @@ else
         try
         {
             _isSaving = true;
-            var updated = await CaseService.UpdateCaseStatusAndAssignmentAsync(_case.Id, _manageModel.Status, _manageModel.AssignedToUserId);
+            var updated = await CaseService.UpdateCaseStatusAndAssignmentAsync(
+                _case.Id, 
+                _manageModel.Status, 
+                _manageModel.AssignedToUserId,
+                _currentUserId!);
+            
             if (!updated)
             {
                 _errorMessage = "Case not found.";
@@ -195,6 +238,11 @@ else
             }
 
             _case = await CaseService.GetCaseByIdAsync(_case.Id);
+            
+            _statusHistory.Clear();
+            var history = await CaseService.GetCaseStatusHistoryAsync(_case.Id);
+            _statusHistory.AddRange(history);
+            
             _successMessage = "Case updated successfully.";
         }
         catch
@@ -205,6 +253,15 @@ else
         {
             _isSaving = false;
         }
+    }
+
+    private string FormatUpdatedTime()
+    {
+        if (_case == null)
+            return string.Empty;
+        
+        DateTime dateTime = _case.UpdatedAtUtc ?? _case.CreatedAtUtc;
+        return dateTime.ToString("u");
     }
 
     private sealed class ManageCaseInputModel
