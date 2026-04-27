@@ -2,8 +2,9 @@
 @rendermode InteractiveServer
 @using Microsoft.AspNetCore.Identity
 @using Microsoft.EntityFrameworkCore
-@attribute [Authorize(Policy = "CanManageUsers")]
+@attribute [Authorize(Roles = "Admin")]
 @inject UserManager<secure_workflow_system.Data.ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
 
 <PageTitle>Manage Users</PageTitle>
 
@@ -20,11 +21,12 @@
 }
 else
 {
-    <table class="table">
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>Email</th>
-                <th>Current Role</th>
+                <th>Email Confirmed</th>
+                <th>Current Roles</th>
                 <th>Set Role</th>
             </tr>
         </thead>
@@ -33,7 +35,8 @@ else
             {
                 <tr>
                     <td>@row.Email</td>
-                    <td>@row.CurrentRole</td>
+                    <td>@(row.EmailConfirmed ? "Yes" : "No")</td>
+                    <td>@row.CurrentRolesDisplay</td>
                     <td>
                         <EditForm Model="row" OnValidSubmit="() => UpdateRoleAsync(row)" FormName="@($"ManageUserRole_{row.UserId}")">
                             <InputSelect class="form-select d-inline-block w-auto me-2" @bind-Value="row.SelectedRole">
@@ -52,13 +55,23 @@ else
 }
 
 @code {
-    private static readonly string[] _roles = ["User", "Staff", "Admin"];
+    private static readonly string[] _allowedRoles = ["User", "Staff", "Admin"];
+    private List<string> _roles = [];
     private List<UserRoleRow>? _rows;
     private string? _message;
     private bool _isError;
 
     protected override async Task OnInitializedAsync()
     {
+        var configuredRoles = await RoleManager.Roles
+            .Where(r => r.Name != null && _allowedRoles.Contains(r.Name))
+            .Select(r => r.Name!)
+            .ToListAsync();
+
+        _roles = configuredRoles.Count > 0
+            ? configuredRoles.OrderBy(r => Array.IndexOf(_allowedRoles, r)).ToList()
+            : _allowedRoles.ToList();
+
         await LoadAsync();
     }
 
@@ -73,14 +86,17 @@ else
         foreach (var user in users)
         {
             var userRoles = await UserManager.GetRolesAsync(user);
-            var currentRole = userRoles.FirstOrDefault(r => _roles.Contains(r)) ?? "None";
+            var appRoles = userRoles.Where(r => _allowedRoles.Contains(r)).ToList();
 
             _rows.Add(new UserRoleRow
             {
                 UserId = user.Id,
                 Email = user.Email ?? user.UserName ?? user.Id,
-                CurrentRole = currentRole,
-                SelectedRole = currentRole == "None" ? "User" : currentRole
+                EmailConfirmed = user.EmailConfirmed,
+                CurrentRolesDisplay = appRoles.Count > 0 ? string.Join(", ", appRoles) : "None",
+                SelectedRole = appRoles.Contains("Admin")
+                    ? "Admin"
+                    : appRoles.FirstOrDefault() ?? "User"
             });
         }
     }
@@ -88,6 +104,13 @@ else
     private async Task UpdateRoleAsync(UserRoleRow row)
     {
         _message = null;
+
+        if (!_allowedRoles.Contains(row.SelectedRole))
+        {
+            _message = "Invalid role selection.";
+            _isError = true;
+            return;
+        }
 
         var user = await UserManager.FindByIdAsync(row.UserId);
         if (user is null)
@@ -98,8 +121,23 @@ else
         }
 
         var existingRoles = await UserManager.GetRolesAsync(user);
-        var rolesToRemove = existingRoles.Where(r => _roles.Contains(r)).ToArray();
+        var appRoles = existingRoles.Where(r => _allowedRoles.Contains(r)).ToList();
 
+        var isCurrentlyAdmin = appRoles.Contains("Admin");
+        var isDemotingAdmin = isCurrentlyAdmin && row.SelectedRole != "Admin";
+
+        if (isDemotingAdmin)
+        {
+            var admins = await UserManager.GetUsersInRoleAsync("Admin");
+            if (admins.Count <= 1)
+            {
+                _message = "Cannot remove the last remaining Admin account.";
+                _isError = true;
+                return;
+            }
+        }
+
+        var rolesToRemove = appRoles.Where(r => r != row.SelectedRole).ToArray();
         if (rolesToRemove.Length > 0)
         {
             var removeResult = await UserManager.RemoveFromRolesAsync(user, rolesToRemove);
@@ -111,12 +149,15 @@ else
             }
         }
 
-        var addResult = await UserManager.AddToRoleAsync(user, row.SelectedRole);
-        if (!addResult.Succeeded)
+        if (!appRoles.Contains(row.SelectedRole))
         {
-            _message = string.Join(", ", addResult.Errors.Select(e => e.Description));
-            _isError = true;
-            return;
+            var addResult = await UserManager.AddToRoleAsync(user, row.SelectedRole);
+            if (!addResult.Succeeded)
+            {
+                _message = string.Join(", ", addResult.Errors.Select(e => e.Description));
+                _isError = true;
+                return;
+            }
         }
 
         await LoadAsync();
@@ -128,7 +169,8 @@ else
     {
         public string UserId { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
-        public string CurrentRole { get; set; } = "None";
+        public bool EmailConfirmed { get; set; }
+        public string CurrentRolesDisplay { get; set; } = "None";
         public string SelectedRole { get; set; } = "User";
     }
 }
