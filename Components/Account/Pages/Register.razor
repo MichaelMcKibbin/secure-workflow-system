@@ -77,6 +77,9 @@
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        user.EmailConfirmed = false;
+        user.IsApproved = false;
+
         var result = await UserManager.CreateAsync(user, Input.Password);
 
         if (!result.Succeeded)
@@ -85,15 +88,7 @@
             return;
         }
 
-        var roleResult = await UserManager.AddToRoleAsync(user, "User");
-        if (!roleResult.Succeeded)
-        {
-            await UserManager.DeleteAsync(user);
-            identityErrors = roleResult.Errors;
-            return;
-        }
-
-        Logger.LogInformation("User created a new account with password.");
+        Logger.LogInformation("User created a new account pending admin approval.");
 
         var userId = await UserManager.GetUserIdAsync(user);
         var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
@@ -104,17 +99,9 @@
 
         await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
 
-        if (UserManager.Options.SignIn.RequireConfirmedAccount)
-        {
-            RedirectManager.RedirectTo(
-                "Account/RegisterConfirmation",
-                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
-        }
-        else
-        {
-            await SignInManager.SignInAsync(user, isPersistent: false);
-            RedirectManager.RedirectTo(ReturnUrl);
-        }
+        RedirectManager.RedirectTo(
+            "Account/RegisterConfirmation",
+            new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
     }
 
     private ApplicationUser CreateUser()

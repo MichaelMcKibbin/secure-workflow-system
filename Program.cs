@@ -144,7 +144,8 @@ static async Task SeedIdentityAsync(WebApplication app)
         {
             UserName = adminEmail,
             Email = adminEmail,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            IsApproved = true
         };
 
         var userResult = await userManager.CreateAsync(adminUser, adminPassword);
@@ -153,13 +154,14 @@ static async Task SeedIdentityAsync(WebApplication app)
             throw new InvalidOperationException($"Failed to create seeded admin user '{adminEmail}': {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
         }
     }
-    else if (!adminUser.EmailConfirmed)
+    else if (!adminUser.EmailConfirmed || !adminUser.IsApproved)
     {
         adminUser.EmailConfirmed = true;
+        adminUser.IsApproved = true;
         var updateResult = await userManager.UpdateAsync(adminUser);
         if (!updateResult.Succeeded)
         {
-            throw new InvalidOperationException($"Failed to confirm seeded admin user '{adminEmail}': {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
+            throw new InvalidOperationException($"Failed to update seeded admin user '{adminEmail}': {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
         }
     }
 
