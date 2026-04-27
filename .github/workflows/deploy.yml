@@ -63,4 +63,5 @@ jobs:
             echo "IMAGE_SHA=${{ env.IMAGE_SHA }}" > workflow.env
             cat workflow.env
             docker compose -p workflow --env-file workflow.env pull
-            docker compose -p workflow --env-file workflow.env up -d
+            docker compose --env-file workflow.env up -d --force-recreate
+            docker compose --env-file workflow.env ps
