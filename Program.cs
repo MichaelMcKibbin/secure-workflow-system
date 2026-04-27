@@ -64,48 +64,7 @@ builder.Services.AddScoped<ICaseService, CaseService>();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await dbContext.Database.MigrateAsync();
-
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-
-    string[] roles = ["Admin", "Staff", "User"];
-
-    foreach (var role in roles)
-    {
-        if (!await roleManager.RoleExistsAsync(role))
-        {
-            var roleResult = await roleManager.CreateAsync(new IdentityRole(role));
-            if (!roleResult.Succeeded)
-                throw new InvalidOperationException($"Failed to create role '{role}': {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
-        }
-    }
-
-    var adminEmail = "admin@local.test";
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-    if (adminUser is null)
-    {
-        adminUser = new ApplicationUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
-
-        var userResult = await userManager.CreateAsync(adminUser, "Admin123!");
-        if (!userResult.Succeeded)
-            throw new InvalidOperationException($"Failed to create dev admin: {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
-
-        var addToRoleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
-        if (!addToRoleResult.Succeeded)
-            throw new InvalidOperationException($"Failed to add dev admin to role: {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
-    }
-}
+await SeedIdentityAsync(app);
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -134,3 +93,82 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();
+
+static async Task SeedIdentityAsync(WebApplication app)
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+    var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
+
+    await dbContext.Database.MigrateAsync();
+
+    string[] roles = ["Admin", "Staff", "User"];
+
+    foreach (var role in roles)
+    {
+        if (await roleManager.RoleExistsAsync(role))
+        {
+            continue;
+        }
+
+        var roleResult = await roleManager.CreateAsync(new IdentityRole(role));
+        if (!roleResult.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to create role '{role}': {string.Join(", ", roleResult.Errors.Select(e => e.Description))}");
+        }
+    }
+
+    var adminEmail = configuration["SeedAdmin:Email"];
+    var adminPassword = configuration["SeedAdmin:Password"];
+
+    if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
+    {
+        if (app.Environment.IsDevelopment())
+        {
+            adminEmail = "admin@local.test";
+            adminPassword = "Admin123!";
+        }
+        else
+        {
+            return;
+        }
+    }
+
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if (adminUser is null)
+    {
+        adminUser = new ApplicationUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+
+        var userResult = await userManager.CreateAsync(adminUser, adminPassword);
+        if (!userResult.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to create seeded admin user '{adminEmail}': {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
+        }
+    }
+    else if (!adminUser.EmailConfirmed)
+    {
+        adminUser.EmailConfirmed = true;
+        var updateResult = await userManager.UpdateAsync(adminUser);
+        if (!updateResult.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to confirm seeded admin user '{adminEmail}': {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
+        }
+    }
+
+    if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+    {
+        var addToRoleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
+        if (!addToRoleResult.Succeeded)
+        {
+            throw new InvalidOperationException($"Failed to add seeded admin user '{adminEmail}' to role 'Admin': {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
+        }
+    }
+}
