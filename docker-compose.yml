@@ -1,30 +1,46 @@
 services:
+  workflow:
+    image: ghcr.io/michaelmckibbin/secure-workflow-system:sha-${IMAGE_SHA:-latest}
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-secure_workflow_system};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+      SeedAdmin__Email: ${SEED_ADMIN_EMAIL}
+      SeedAdmin__Password: ${SEED_ADMIN_PASSWORD}
+    ports:
+      - "${WORKFLOW_PORT:-8080}:8080"
+
   postgres:
     image: postgres:16
     container_name: sws_postgres
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: secure_workflow_system
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ${POSTGRES_DB:-secure_workflow_system}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  # Optional local/dev admin UI. Not required for cloud production deployment.
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
     restart: unless-stopped
+    profiles: ["dev"]
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@admin.com
-      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@local.test}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     ports:
-      - "5050:80"
+      - "${PGADMIN_PORT:-5050}:80"
     depends_on:
       - postgres
-
     volumes:
-    - pgadmin_data:/var/lib/pgadmin
+      - pgadmin_data:/var/lib/pgadmin
 
 volumes:
   pgdata:
