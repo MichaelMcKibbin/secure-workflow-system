@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Secrets file for storing sensitive data such as API keys during development
+SECRETS.md
