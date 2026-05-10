@@ -102,7 +102,20 @@ static async Task SeedIdentityAsync(WebApplication app)
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
-    await dbContext.Database.MigrateAsync();
+    var migrationAttempts = 0;
+    while (true)
+    {
+        try
+        {
+            await dbContext.Database.MigrateAsync();
+            break;
+        }
+        catch when (migrationAttempts < 5)
+        {
+            migrationAttempts++;
+            await Task.Delay(TimeSpan.FromSeconds(5));
+        }
+    }
 
     string[] roles = ["Admin", "Staff", "User"];
 
