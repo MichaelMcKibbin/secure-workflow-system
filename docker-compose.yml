@@ -11,6 +11,17 @@ services:
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-secure_workflow_system};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
       SeedAdmin__Email: ${SEED_ADMIN_EMAIL}
       SeedAdmin__Password: ${SEED_ADMIN_PASSWORD}
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-proxy
+      - traefik.http.routers.workflow.rule=Host(`workflow.michaelmckibbin.cloud`)
+      - traefik.http.routers.workflow.entrypoints=websecure
+      - traefik.http.routers.workflow.tls=true
+      - traefik.http.routers.workflow.tls.certresolver=le
+      - traefik.http.services.workflow.loadbalancer.server.port=8080
+    networks:
+      - default
+      - traefik-proxy
     ports:
       - "${WORKFLOW_PORT:-8080}:8080"
 
@@ -47,6 +58,10 @@ services:
       - postgres
     volumes:
       - pgadmin_data:/var/lib/pgadmin
+
+networks:
+  traefik-proxy:
+    external: true
 
 volumes:
   pgdata:
