@@ -17,7 +17,9 @@ Why is this change useful?
 Describe the suggested approach.
 
 ## Examples (if applicable)
-```csharp```
+```
+insert code example here
+```
 // Example code here
 
 ## Team Feedback
