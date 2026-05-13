@@ -1,0 +1,20 @@
+# Global ownership
+* @MichaelMcKibbin
+
+# GitHub workflows and deployment
+/.github/workflows/ @MichaelMcKibbin @devops-imaginaryfriend
+
+# Docker and deployment configuration
+/docker-compose.yml @MichaelMcKibbin @devops-imaginaryfriend
+/Dockerfile @MichaelMcKibbin @devops-imaginaryfriend
+
+# Infrastructure and deployment scripts
+/scripts/ @MichaelMcKibbin @devops-imaginaryfriend
+
+# Authentication and security-related code
+/Components/Account/ @MichaelMcKibbin @devops-imaginaryfriend
+/Data/ @MichaelMcKibbin
+
+# Documentation
+/docs/ @MichaelMcKibbin
+*.md @MichaelMcKibbin
