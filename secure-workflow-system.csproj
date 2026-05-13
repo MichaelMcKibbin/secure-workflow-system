@@ -24,7 +24,7 @@
     <None Include=".github\ISSUE_TEMPLATE\test_qa_task.md" />
     <None Include=".github\miscellaneous-issue-template.md" />
     <None Include=".github\ISSUE_TEMPLATE\follow_up.md" />
-    <None Include=".github\pr_template\pull_request_template.md" />
+    <None Include=".github\pull_request_template.md" />
     <None Include=".github\seed-data---database-change-request.md" />
     <None Include=".github\task---work-item.md" />
     <None Include=".github\test---qa-task.md" />
@@ -38,10 +38,6 @@
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include=".github\PR_TEMPLATE\" />
   </ItemGroup>
 
 </Project>
