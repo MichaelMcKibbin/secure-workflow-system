@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using secure_workflow_system.Components;
 using secure_workflow_system.Components.Account;
@@ -61,6 +62,9 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<ICaseService, CaseService>();
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/lib/workflow/dpkeys"))
+    .SetApplicationName("SecureWorkflowSystem");
 
 var app = builder.Build();
 
