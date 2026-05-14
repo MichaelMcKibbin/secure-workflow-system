@@ -11,10 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include=".github\bug_report.md" />
     <None Include=".github\CODEOWNERS" />
-    <None Include=".github\documentation---style-discussion.md" />
-    <None Include=".github\feature_request.md" />
     <None Include=".github\ISSUE_TEMPLATE\bug_report.md" />
     <None Include=".github\ISSUE_TEMPLATE\documentation---style-discussion.md" />
     <None Include=".github\ISSUE_TEMPLATE\feature_request.md" />
@@ -22,12 +19,8 @@
     <None Include=".github\ISSUE_TEMPLATE\seed-data---database-change-request.md" />
     <None Include=".github\ISSUE_TEMPLATE\task---work-item.md" />
     <None Include=".github\ISSUE_TEMPLATE\test_qa_task.md" />
-    <None Include=".github\miscellaneous-issue-template.md" />
     <None Include=".github\ISSUE_TEMPLATE\follow_up.md" />
     <None Include=".github\pull_request_template.md" />
-    <None Include=".github\seed-data---database-change-request.md" />
-    <None Include=".github\task---work-item.md" />
-    <None Include=".github\test---qa-task.md" />
     <None Include=".github\workflows\ci.yml" />
     <None Include=".github\workflows\deploy.yml" />
     <None Include="secure-workflow-system.slnx" />
