@@ -62,9 +62,16 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<ICaseService, CaseService>();
-builder.Services.AddDataProtection()
-    .PersistKeysToFileSystem(new DirectoryInfo("/var/lib/workflow/dpkeys"))
+var dataProtectionBuilder = builder.Services.AddDataProtection()
     .SetApplicationName("SecureWorkflowSystem");
+
+var keyRingPath = builder.Configuration["DataProtection:KeyRingPath"]
+    ?? Environment.GetEnvironmentVariable("DATA_PROTECTION_KEY_RING_PATH");
+
+if (!string.IsNullOrWhiteSpace(keyRingPath))
+{
+    dataProtectionBuilder.PersistKeysToFileSystem(new DirectoryInfo(keyRingPath));
+}
 
 var app = builder.Build();
 
