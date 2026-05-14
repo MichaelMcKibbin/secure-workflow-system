@@ -66,6 +66,12 @@ networks:
   traefik-proxy:
     external: true
 
+environment:
+  DataProtection__KeyRingPath: /var/lib/workflow/dpkeys
+
+volumes:
+  - dpkeys:/var/lib/workflow/dpkeys
+
 volumes:
   pgdata:
   pgadmin_data:
