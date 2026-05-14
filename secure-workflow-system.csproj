@@ -33,8 +33,4 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include=".github\PR_TEMPLATE\" />
-  </ItemGroup>
-
 </Project>

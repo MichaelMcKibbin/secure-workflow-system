@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.EntityFrameworkCore;
 using secure_workflow_system.Components;
 using secure_workflow_system.Components.Account;
@@ -61,6 +62,16 @@ builder.Services.AddIdentityCore<ApplicationUser>(options =>
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 builder.Services.AddScoped<ICaseService, CaseService>();
+var dataProtectionBuilder = builder.Services.AddDataProtection()
+    .SetApplicationName("SecureWorkflowSystem");
+
+var keyRingPath = builder.Configuration["DataProtection:KeyRingPath"]
+    ?? Environment.GetEnvironmentVariable("DATA_PROTECTION_KEY_RING_PATH");
+
+if (!string.IsNullOrWhiteSpace(keyRingPath))
+{
+    dataProtectionBuilder.PersistKeysToFileSystem(new DirectoryInfo(keyRingPath));
+}
 
 var app = builder.Build();
 
