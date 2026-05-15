@@ -53,8 +53,8 @@ These secrets are used in `.github/workflows/deploy.yml` and referenced as `${{ 
 	  echo "IMAGE_SHA=${{ env.IMAGE_SHA }}" > workflow.env
 	  echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> workflow.env
 	  echo "ConnectionStrings__DefaultConnection=${{ secrets.WORKFLOW_CONNECTION_STRING }}" >> workflow.env
-	  echo "SeedAdmin__Email=${{ secrets.SEED_ADMIN_EMAIL }}" >> workflow.env
-	  echo "SeedAdmin__Password=${{ secrets.SEED_ADMIN_PASSWORD }}" >> workflow.env
+	  echo "SEED_ADMIN_EMAIL=${{ secrets.SEED_ADMIN_EMAIL }}" >> workflow.env
+	  echo "SEED_ADMIN_PASSWORD=${{ secrets.SEED_ADMIN_PASSWORD }}" >> workflow.env
 ```
 
 ---
@@ -74,8 +74,8 @@ The deploy workflow writes to `workflow.env`:
 IMAGE_SHA=abc123def456...
 POSTGRES_PASSWORD=<from secrets.POSTGRES_PASSWORD>
 ConnectionStrings__DefaultConnection=<from secrets.WORKFLOW_CONNECTION_STRING>
-SeedAdmin__Email=<from secrets.SEED_ADMIN_EMAIL>
-SeedAdmin__Password=<from secrets.SEED_ADMIN_PASSWORD>
+SEED_ADMIN_EMAIL=<from secrets.SEED_ADMIN_EMAIL>
+SEED_ADMIN_PASSWORD=<from secrets.SEED_ADMIN_PASSWORD>
 ```
 
 ### Optional Variables
@@ -117,8 +117,8 @@ cat > workflow.env << EOF
 IMAGE_SHA=latest
 POSTGRES_PASSWORD=YourSecurePassword123!
 ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=secure_workflow_system;Username=postgres;Password=YourSecurePassword123!
-SeedAdmin__Email=admin@example.com
-SeedAdmin__Password=AdminPassword123!
+SEED_ADMIN_EMAIL=admin@example.com
+SEED_ADMIN_PASSWORD=AdminPassword123!
 EOF
 
 # Run containers
@@ -206,8 +206,8 @@ services:
 	environment:
 	  ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
 	  ConnectionStrings__DefaultConnection: Host=postgres;...;Password=${POSTGRES_PASSWORD}
-	  SeedAdmin__Email: ${SEED_ADMIN_EMAIL}
-	  SeedAdmin__Password: ${SEED_ADMIN_PASSWORD}
+	  SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL}
+	  SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
 
   postgres:
 	environment:

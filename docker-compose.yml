@@ -10,8 +10,8 @@ services:
       ASPNETCORE_URLS: http://+:8080
       DATA_PROTECTION_KEY_RING_PATH: /home/app/.aspnet/DataProtection-Keys
       ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-secure_workflow_system};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
-      SeedAdmin__Email: ${SEED_ADMIN_EMAIL}
-      SeedAdmin__Password: ${SEED_ADMIN_PASSWORD}
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-proxy
@@ -66,13 +66,8 @@ networks:
   traefik-proxy:
     external: true
 
-environment:
-  DataProtection__KeyRingPath: /var/lib/workflow/dpkeys
-
-volumes:
-  - dpkeys:/var/lib/workflow/dpkeys
-
 volumes:
   pgdata:
   pgadmin_data:
   dpkeys:
+
