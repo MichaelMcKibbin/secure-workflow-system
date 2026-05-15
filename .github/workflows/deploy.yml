@@ -65,6 +65,10 @@ jobs:
             echo "ConnectionStrings__DefaultConnection=${{ secrets.WORKFLOW_CONNECTION_STRING }}" >> workflow.env
             echo "SEED_ADMIN_EMAIL=${{ secrets.SEED_ADMIN_EMAIL }}" >> workflow.env
             echo "SEED_ADMIN_PASSWORD=${{ secrets.SEED_ADMIN_PASSWORD }}" >> workflow.env
+            echo "SEED_USER_EMAIL=${{ secrets.SEED_USER_EMAIL }}" >> workflow.env
+            echo "SEED_USER_PASSWORD=${{ secrets.SEED_USER_PASSWORD }}" >> workflow.env
+            echo "SEED_STAFF_EMAIL=${{ secrets.SEED_STAFF_EMAIL }}" >> workflow.env
+            echo "SEED_STAFF_PASSWORD=${{ secrets.SEED_STAFF_PASSWORD }}" >> workflow.env
             echo "DataProtection__KeyRingPath=/var/lib/workflow/dpkeys" >> workflow.env
 
             docker compose -p workflow --env-file workflow.env pull

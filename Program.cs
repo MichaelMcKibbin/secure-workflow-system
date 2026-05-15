@@ -144,8 +144,8 @@ static async Task SeedIdentityAsync(WebApplication app)
         }
     }
 
-    var adminEmail = configuration["SeedAdmin:Email"];
-    var adminPassword = configuration["SeedAdmin:Password"];
+    var adminEmail = configuration["SEED_ADMIN_EMAIL"];
+    var adminPassword = configuration["SEED_ADMIN_PASSWORD"];
 
     if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword))
     {
@@ -160,41 +160,58 @@ static async Task SeedIdentityAsync(WebApplication app)
         }
     }
 
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+    await SeedIdentityUserAsync(userManager, adminEmail, adminPassword, "Admin", "seeded admin user");
+    await SeedIdentityUserAsync(userManager, configuration["SEED_USER_EMAIL"], configuration["SEED_USER_PASSWORD"], "User", "seeded user");
+    await SeedIdentityUserAsync(userManager, configuration["SEED_STAFF_EMAIL"], configuration["SEED_STAFF_PASSWORD"], "Staff", "seeded staff user");
+}
 
-    if (adminUser is null)
+static async Task SeedIdentityUserAsync(
+    UserManager<ApplicationUser> userManager,
+    string? email,
+    string? password,
+    string role,
+    string userDescription)
+{
+    if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
     {
-        adminUser = new ApplicationUser
+        return;
+    }
+
+    var user = await userManager.FindByEmailAsync(email);
+
+    if (user is null)
+    {
+        user = new ApplicationUser
         {
-            UserName = adminEmail,
-            Email = adminEmail,
+            UserName = email,
+            Email = email,
             EmailConfirmed = true,
             IsApproved = true
         };
 
-        var userResult = await userManager.CreateAsync(adminUser, adminPassword);
+        var userResult = await userManager.CreateAsync(user, password);
         if (!userResult.Succeeded)
         {
-            throw new InvalidOperationException($"Failed to create seeded admin user '{adminEmail}': {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
+            throw new InvalidOperationException($"Failed to create {userDescription} '{email}': {string.Join(", ", userResult.Errors.Select(e => e.Description))}");
         }
     }
-    else if (!adminUser.EmailConfirmed || !adminUser.IsApproved)
+    else if (!user.EmailConfirmed || !user.IsApproved)
     {
-        adminUser.EmailConfirmed = true;
-        adminUser.IsApproved = true;
-        var updateResult = await userManager.UpdateAsync(adminUser);
+        user.EmailConfirmed = true;
+        user.IsApproved = true;
+        var updateResult = await userManager.UpdateAsync(user);
         if (!updateResult.Succeeded)
         {
-            throw new InvalidOperationException($"Failed to update seeded admin user '{adminEmail}': {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
+            throw new InvalidOperationException($"Failed to update {userDescription} '{email}': {string.Join(", ", updateResult.Errors.Select(e => e.Description))}");
         }
     }
 
-    if (!await userManager.IsInRoleAsync(adminUser, "Admin"))
+    if (!await userManager.IsInRoleAsync(user, role))
     {
-        var addToRoleResult = await userManager.AddToRoleAsync(adminUser, "Admin");
+        var addToRoleResult = await userManager.AddToRoleAsync(user, role);
         if (!addToRoleResult.Succeeded)
         {
-            throw new InvalidOperationException($"Failed to add seeded admin user '{adminEmail}' to role 'Admin': {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
+            throw new InvalidOperationException($"Failed to add {userDescription} '{email}' to role '{role}': {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
         }
     }
 }
