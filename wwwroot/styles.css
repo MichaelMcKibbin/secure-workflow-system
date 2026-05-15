@@ -141,6 +141,16 @@
     display: inline-block;
 }
 
+.badge-success {
+    background-color: var(--color-success);
+    color: white;
+}
+
+.badge-secondary {
+    background-color: var(--color-neutral);
+    color: var(--color-primary);
+}
+
 .badge-active {
     background-color: var(--color-success);
     color: white;

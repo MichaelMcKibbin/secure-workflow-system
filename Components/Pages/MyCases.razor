@@ -40,7 +40,7 @@ else
                             <strong>ID:</strong> #@workflowCase.Id
                         </p>
                         <p class="case-meta">
-                            <strong>Created:</strong> @workflowCase.CreatedAtUtc.ToString("g")
+                            <strong>Created:</strong> @($"{workflowCase.CreatedAtUtc:g} UTC")
                         </p>
                     </div>
                 </a>

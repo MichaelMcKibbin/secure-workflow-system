@@ -351,7 +351,8 @@ else
         }
 
         var badgeClass = "badge badge-secondary";
-        return new MarkupString($"<span class=\"{badgeClass}\">{statusStr}</span>");
+        var encodedStatusStr = System.Text.Encodings.Web.HtmlEncoder.Default.Encode(statusStr);
+        return new MarkupString($"<span class=\"{badgeClass}\">{encodedStatusStr}</span>");
     }
 
     private sealed class ManageCaseInputModel
