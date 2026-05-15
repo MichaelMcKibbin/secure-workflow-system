@@ -9,7 +9,9 @@
 
 <PageTitle>Case Details</PageTitle>
 
-<h1>Case Details</h1>
+<div class="section-header">
+    <h2>Case Details</h2>
+</div>
 
 @if (!string.IsNullOrEmpty(_errorMessage))
 {
@@ -31,93 +33,140 @@ else if (_case is null)
 }
 else
 {
-    <dl class="row">
-        <dt class="col-sm-3">Id</dt>
-        <dd class="col-sm-9">@_case.Id</dd>
-
-        <dt class="col-sm-3">Title</dt>
-        <dd class="col-sm-9">@_case.Title</dd>
-
-        <dt class="col-sm-3">Description</dt>
-        <dd class="col-sm-9">@_case.Description</dd>
-
-        <dt class="col-sm-3">Status</dt>
-        <dd class="col-sm-9">@FormatStatus(_case.Status)</dd>
-
-        <dt class="col-sm-3">Created By</dt>
-        <dd class="col-sm-9">@_case.CreatedByUserId</dd>
-
-        <dt class="col-sm-3">Assigned To</dt>
-        <dd class="col-sm-9">@(_case.AssignedToUserId ?? "Unassigned")</dd>
-
-        <dt class="col-sm-3">Created (UTC)</dt>
-        <dd class="col-sm-9">@_case.CreatedAtUtc.ToString("u")</dd>
-
-        <dt class="col-sm-3">Updated (UTC)</dt>
-        <dd class="col-sm-9">@FormatUpdatedTime()</dd>
-    </dl>
+    <div class="card mb-4 fade-in">
+        <div class="card-header">
+            <h5 class="card-title mb-0">📋 Case Information</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="text-primary fw-bold">Title</h6>
+                    <p>@_case.Title</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="text-primary fw-bold">Status</h6>
+                    <p>@GetStatusBadge(_case.Status)</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h6 class="text-primary fw-bold">Description</h6>
+                    <p>@_case.Description</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <h6 class="text-primary fw-bold">Case ID</h6>
+                    <p class="text-muted">@_case.Id</p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="text-primary fw-bold">Created By</h6>
+                    <p class="text-muted">@_case.CreatedByUserId</p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="text-primary fw-bold">Assigned To</h6>
+                    <p class="text-muted">@(_case.AssignedToUserId ?? "Unassigned")</p>
+                </div>
+                <div class="col-md-3">
+                    <h6 class="text-primary fw-bold">Created</h6>
+                    <p class="text-muted">@_case.CreatedAtUtc.ToString("g")</p>
+                </div>
+            </div>
+            @if (_case.UpdatedAtUtc.HasValue)
+            {
+                <div class="row">
+                    <div class="col-md-3">
+                        <h6 class="text-primary fw-bold">Last Updated</h6>
+                        <p class="text-muted">@_case.UpdatedAtUtc.Value.ToString("g")</p>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
 
     @if (_canManageCases)
     {
-        <h3>Manage Case</h3>
-        <EditForm Model="_manageModel" OnValidSubmit="HandleManageSubmitAsync" FormName="ManageCaseForm">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-
-            <div class="mb-3">
-                <label class="form-label" for="status">Status</label>
-                <InputSelect id="status" class="form-select" @bind-Value="_manageModel.Status">
-                    @foreach (var status in GetValidTransitions())
-                    {
-                        <option value="@status.ToString()">@FormatStatus(status)</option>
-                    }
-                </InputSelect>
+        <div class="card mb-4 fade-in">
+            <div class="card-header">
+                <h5 class="card-title mb-0">⚙️ Manage Case</h5>
             </div>
+            <div class="card-body">
+                <EditForm Model="_manageModel" OnValidSubmit="HandleManageSubmitAsync" FormName="ManageCaseForm">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary class="alert alert-danger" />
 
-            <div class="mb-3">
-                <label class="form-label" for="assignedTo">Assigned To</label>
-                <InputSelect id="assignedTo" class="form-select" @bind-Value="_manageModel.AssignedToUserId">
-                    <option value="">Unassigned</option>
-                    @foreach (var user in _assignableUsers)
-                    {
-                        <option value="@user.Id">@user.Display</option>
-                    }
-                </InputSelect>
+                    <div class="mb-3">
+                        <label class="form-label" for="status">Status</label>
+                        <InputSelect id="status" class="form-select" @bind-Value="_manageModel.Status">
+                            @foreach (var status in GetValidTransitions())
+                            {
+                                <option value="@status.ToString()">@FormatStatus(status)</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="assignedTo">Assigned To</label>
+                        <InputSelect id="assignedTo" class="form-select" @bind-Value="_manageModel.AssignedToUserId">
+                            <option value="">Unassigned</option>
+                            @foreach (var user in _assignableUsers)
+                            {
+                                <option value="@user.Id">@user.Display</option>
+                            }
+                        </InputSelect>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" disabled="@_isSaving">
+                        @if (_isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Saving...</span>
+                        }
+                        else
+                        {
+                            <span>💾 Save Changes</span>
+                        }
+                    </button>
+                </EditForm>
             </div>
-
-            <button type="submit" class="btn btn-primary" disabled="@_isSaving">@(_isSaving ? "Saving..." : "Save")</button>
-        </EditForm>
+        </div>
     }
 
-    <h3 class="mt-4">Status History</h3>
-    @if (_statusHistory.Count == 0)
-    {
-        <p><em>No status changes recorded yet.</em></p>
-    }
-    else
-    {
-        <table class="table table-sm table-striped">
-            <thead>
-                <tr>
-                    <th>From</th>
-                    <th>To</th>
-                    <th>Changed By</th>
-                    <th>Changed At (UTC)</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var history in _statusHistory)
-                {
-                    <tr>
-                        <td>@FormatStatus(history.OldStatus)</td>
-                        <td>@FormatStatus(history.NewStatus)</td>
-                        <td>@history.ChangedByUserId</td>
-                        <td>@history.ChangedAtUtc.ToString("u")</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
+    <div class="card fade-in">
+        <div class="card-header">
+            <h5 class="card-title mb-0">📜 Status History</h5>
+        </div>
+        <div class="card-body">
+            @if (_statusHistory.Count == 0)
+            {
+                <p class="text-muted"><em>No status changes recorded yet.</em></p>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>From</th>
+                            <th>To</th>
+                            <th>Changed By</th>
+                            <th>Changed At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var history in _statusHistory)
+                        {
+                            <tr>
+                                <td>@GetStatusBadgeFromString(history.OldStatus)</td>
+                                <td>@GetStatusBadgeFromString(history.NewStatus)</td>
+                                <td>@history.ChangedByUserId</td>
+                                <td>@history.ChangedAtUtc.ToString("g")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
 }
 
 @code {
@@ -276,6 +325,33 @@ else
             .Cast<secure_workflow_system.Data.WorkflowState>()
             .Where(state => secure_workflow_system.Data.Case.IsValidTransition(_case.Status, state))
             .ToList();
+    }
+
+    private MarkupString GetStatusBadge(secure_workflow_system.Data.WorkflowState status)
+    {
+        var badgeClass = status switch
+        {
+            secure_workflow_system.Data.WorkflowState.New => "badge badge-info",
+            secure_workflow_system.Data.WorkflowState.Assigned => "badge badge-info",
+            secure_workflow_system.Data.WorkflowState.InProgress => "badge badge-warning",
+            secure_workflow_system.Data.WorkflowState.Resolved => "badge badge-success",
+            secure_workflow_system.Data.WorkflowState.Closed => "badge badge-danger",
+            _ => "badge badge-secondary"
+        };
+
+        var statusText = FormatStatus(status);
+        return new MarkupString($"<span class=\"{badgeClass}\">{statusText}</span>");
+    }
+
+    private MarkupString GetStatusBadgeFromString(string statusStr)
+    {
+        if (Enum.TryParse<secure_workflow_system.Data.WorkflowState>(statusStr, out var status))
+        {
+            return GetStatusBadge(status);
+        }
+
+        var badgeClass = "badge badge-secondary";
+        return new MarkupString($"<span class=\"{badgeClass}\">{statusStr}</span>");
     }
 
     private sealed class ManageCaseInputModel
