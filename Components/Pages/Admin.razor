@@ -3,10 +3,32 @@
 
 <PageTitle>Admin</PageTitle>
 
-<h1>Admin</h1>
+<div class="section-header">
+    <h2>Administration</h2>
+    <p class="section-subheader">Manage users and system operations</p>
+</div>
 
-<p>Administrative tools:</p>
-<ul>
-    <li><a href="/admin/users">Manage Users</a></li>
-    <li><a href="/cases">Case Operations</a></li>
-</ul>
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card fade-in h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">👥 User Management</h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <p>Manage user accounts, permissions, and access levels.</p>
+                <a href="/admin/users" class="btn btn-primary mt-auto">Manage Users</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card fade-in h-100">
+            <div class="card-header">
+                <h5 class="card-title mb-0">📋 Case Operations</h5>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <p>View and manage all cases in the system.</p>
+                <a href="/cases" class="btn btn-primary mt-auto">View Cases</a>
+            </div>
+        </div>
+    </div>
+</div>

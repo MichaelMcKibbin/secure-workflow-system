@@ -21,8 +21,8 @@ The deployment environment variable names did not match what `docker-compose.yml
 
 In `.github/workflows/deploy.yml`, the generated `workflow.env` originally used:
 
-- `SeedAdmin__Email`
-- `SeedAdmin__Password`
+- `SeedAdmin__Email` (modified to SEED_ADMIN_EMAIL in the fix)
+- `SeedAdmin__Password` (modified to SEED_ADMIN_PASSWORD in the fix)
 
 But `docker-compose.yml` maps app config from:
 
@@ -40,8 +40,8 @@ Updated `.github/workflows/deploy.yml` to write the correct variables:
 
 `docker-compose.yml` then maps them to app configuration:
 
-- `SeedAdmin__Email: ${SEED_ADMIN_EMAIL}`
-- `SeedAdmin__Password: ${SEED_ADMIN_PASSWORD}`
+- `SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL}`
+- `SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}`
 
 This allows `Program.cs` seeding to receive values and create the admin user.
 

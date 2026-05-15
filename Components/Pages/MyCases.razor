@@ -5,7 +5,10 @@
 
 <PageTitle>Cases</PageTitle>
 
-<h1>@(_isStaffOrAdmin ? "All Cases" : "My Cases")</h1>
+<div class="section-header">
+    <h2>@(_isStaffOrAdmin ? "📋 All Cases" : "📋 My Cases")</h2>
+    <p class="section-subheader">@(_isStaffOrAdmin ? "View all cases in the system" : "View your assigned cases")</p>
+</div>
 
 @if (!string.IsNullOrEmpty(_errorMessage))
 {
@@ -17,31 +20,33 @@ else if (_cases is null)
 }
 else if (_cases.Count == 0)
 {
-    <p>No cases found.</p>
+    <div class="alert alert-info">
+        <p class="mb-0">No cases found. @(_isStaffOrAdmin ? "" : "When cases are assigned to you, they will appear here.")</p>
+    </div>
 }
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Status</th>
-                <th>Created (UTC)</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var workflowCase in _cases)
-            {
-                <tr>
-                    <td><a href="@($"/cases/{workflowCase.Id}")">@workflowCase.Id</a></td>
-                    <td>@workflowCase.Title</td>
-                    <td>@workflowCase.Status</td>
-                    <td>@workflowCase.CreatedAtUtc.ToString("u")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="row">
+        @foreach (var workflowCase in _cases)
+        {
+            <div class="col-md-6 col-lg-4 mb-3">
+                <a href="@($"/cases/{workflowCase.Id}")" class="text-decoration-none">
+                    <div class="case-card fade-in status-@GetStatusClass(workflowCase.Status)">
+                        <h5>@workflowCase.Title</h5>
+                        <p class="case-meta mb-2">
+                            <span class="badge @GetBadgeClass(workflowCase.Status)">@FormatStatus(workflowCase.Status)</span>
+                        </p>
+                        <p class="case-meta mb-1">
+                            <strong>ID:</strong> #@workflowCase.Id
+                        </p>
+                        <p class="case-meta">
+                            <strong>Created:</strong> @($"{workflowCase.CreatedAtUtc:g} UTC")
+                        </p>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
 }
 
 @code {
@@ -75,5 +80,36 @@ else
             _errorMessage = "Unable to load cases right now. Please try again.";
             _cases = [];
         }
+    }
+
+    private string FormatStatus(secure_workflow_system.Data.WorkflowState status)
+    {
+        return status.ToString().Replace("InProgress", "In Progress");
+    }
+
+    private string GetStatusClass(secure_workflow_system.Data.WorkflowState status)
+    {
+        return status switch
+        {
+            secure_workflow_system.Data.WorkflowState.New => "open",
+            secure_workflow_system.Data.WorkflowState.Assigned => "pending",
+            secure_workflow_system.Data.WorkflowState.InProgress => "pending",
+            secure_workflow_system.Data.WorkflowState.Resolved => "closed",
+            secure_workflow_system.Data.WorkflowState.Closed => "closed",
+            _ => "open"
+        };
+    }
+
+    private string GetBadgeClass(secure_workflow_system.Data.WorkflowState status)
+    {
+        return status switch
+        {
+            secure_workflow_system.Data.WorkflowState.New => "badge-info",
+            secure_workflow_system.Data.WorkflowState.Assigned => "badge-warning",
+            secure_workflow_system.Data.WorkflowState.InProgress => "badge-warning",
+            secure_workflow_system.Data.WorkflowState.Resolved => "badge-success",
+            secure_workflow_system.Data.WorkflowState.Closed => "badge-danger",
+            _ => "badge-secondary"
+        };
     }
 }
