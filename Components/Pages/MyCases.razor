@@ -34,7 +34,7 @@ else
                     <div class="case-card fade-in status-@GetStatusClass(workflowCase.Status)">
                         <h5>@workflowCase.Title</h5>
                         <p class="case-meta mb-2">
-                            <span class="badge badge-info">@FormatStatus(workflowCase.Status)</span>
+                            <span class="badge @GetBadgeClass(workflowCase.Status)">@FormatStatus(workflowCase.Status)</span>
                         </p>
                         <p class="case-meta mb-1">
                             <strong>ID:</strong> #@workflowCase.Id
@@ -97,6 +97,19 @@ else
             secure_workflow_system.Data.WorkflowState.Resolved => "closed",
             secure_workflow_system.Data.WorkflowState.Closed => "closed",
             _ => "open"
+        };
+    }
+
+    private string GetBadgeClass(secure_workflow_system.Data.WorkflowState status)
+    {
+        return status switch
+        {
+            secure_workflow_system.Data.WorkflowState.New => "badge-info",
+            secure_workflow_system.Data.WorkflowState.Assigned => "badge-info",
+            secure_workflow_system.Data.WorkflowState.InProgress => "badge-warning",
+            secure_workflow_system.Data.WorkflowState.Resolved => "badge-success",
+            secure_workflow_system.Data.WorkflowState.Closed => "badge-danger",
+            _ => "badge-secondary"
         };
     }
 }
