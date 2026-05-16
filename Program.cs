@@ -154,10 +154,6 @@ static async Task SeedIdentityAsync(WebApplication app)
             adminEmail = "admin@local.test";
             adminPassword = "Admin123!";
         }
-        else
-        {
-            return;
-        }
     }
 
     await SeedIdentityUserAsync(userManager, adminEmail, adminPassword, "Admin", "seeded admin user");
