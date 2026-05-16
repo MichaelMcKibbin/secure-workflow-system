@@ -1,6 +1,6 @@
 services:
   workflow:
-    image: ghcr.io/michaelmckibbin/secure-workflow-system:sha-${IMAGE_SHA}
+    image: ghcr.io/michaelmckibbin/secure-workflow-system:${IMAGE_SHA}
     restart: unless-stopped
     depends_on:
       postgres:
