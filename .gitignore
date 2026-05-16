@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # Secrets file for storing sensitive data such as API keys during development
 SECRETS.md
+
+# additional excluded notes
+troubleshooting_deployment.txt
