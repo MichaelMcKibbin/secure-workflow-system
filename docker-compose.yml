@@ -1,6 +1,6 @@
 services:
   workflow:
-    image: ghcr.io/michaelmckibbin/secure-workflow-system@${IMAGE_DIGEST}
+    image: ghcr.io/michaelmckibbin/secure-workflow-system@${IMAGE_DIGEST:?IMAGE_DIGEST must be set to a valid image digest}
     restart: unless-stopped
     depends_on:
       postgres:
