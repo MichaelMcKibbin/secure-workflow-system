@@ -1,4 +1,5 @@
 @page "/cases"
+@rendermode InteractiveServer
 @attribute [Authorize(Policy = "CanViewCases")]
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject secure_workflow_system.Services.ICaseService CaseService
@@ -13,12 +14,12 @@
         </div>
         <div class="layout-toggle" role="group" aria-label="Layout options">
             <button class="btn @(_isListLayout ? "btn-outline-primary" : "btn-primary") btn-sm" 
-                    @onclick="() => _isListLayout = false"
+                    @onclick="SwitchToCardLayout"
                     title="Card view">
                 📇 Cards
             </button>
             <button class="btn @(_isListLayout ? "btn-primary" : "btn-outline-primary") btn-sm" 
-                    @onclick="() => _isListLayout = true"
+                    @onclick="SwitchToListLayout"
                     title="List view">
                 📋 List
             </button>
@@ -57,7 +58,7 @@ else
                 <tbody>
                     @foreach (var workflowCase in _cases)
                     {
-                        <tr class="case-list-row" style="cursor: pointer;" @onclick="() => { }">
+                        <tr class="case-list-row">
                             <td>
                                 <a href="@($"/cases/{workflowCase.Id}")" class="text-decoration-none">
                                     #@workflowCase.Id
@@ -167,5 +168,15 @@ else
             secure_workflow_system.Data.WorkflowState.Closed => "badge-danger",
             _ => "badge-secondary"
         };
+    }
+
+    private void SwitchToCardLayout()
+    {
+        _isListLayout = false;
+    }
+
+    private void SwitchToListLayout()
+    {
+        _isListLayout = true;
     }
 }

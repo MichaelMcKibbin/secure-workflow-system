@@ -61,11 +61,11 @@ else
                 </div>
                 <div class="col-md-3">
                     <h6 class="text-primary fw-bold">Created By</h6>
-                    <p class="text-muted">@_case.CreatedByUserId</p>
+                    <p class="text-muted">@_case.CreatedByUser?.UserName</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="text-primary fw-bold">Assigned To</h6>
-                    <p class="text-muted">@(_case.AssignedToUserId ?? "Unassigned")</p>
+                    <p class="text-muted">@(_case.AssignedToUser?.UserName ?? "Unassigned")</p>
                 </div>
                 <div class="col-md-3">
                     <h6 class="text-primary fw-bold">Created</h6>
@@ -158,7 +158,7 @@ else
                             <tr>
                                 <td>@GetStatusBadgeFromString(history.OldStatus)</td>
                                 <td>@GetStatusBadgeFromString(history.NewStatus)</td>
-                                <td>@history.ChangedByUserId</td>
+                                <td>@history.ChangedByUser?.UserName</td>
                                 <td>@history.ChangedAtUtc.ToString("g")</td>
                             </tr>
                         }

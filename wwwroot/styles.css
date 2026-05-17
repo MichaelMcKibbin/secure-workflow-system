@@ -439,6 +439,7 @@
 
 .case-list-row {
     transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .case-list-row:hover {
@@ -452,6 +453,7 @@
 .case-list-row a {
     color: var(--color-primary);
     text-decoration: none;
+    display: block;
 }
 
 .case-list-row a:hover {
