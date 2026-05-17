@@ -159,6 +159,86 @@ static async Task SeedIdentityAsync(WebApplication app)
     await SeedIdentityUserAsync(userManager, adminEmail, adminPassword, "Admin", "seeded admin user");
     await SeedIdentityUserAsync(userManager, configuration["SEED_USER_EMAIL"], configuration["SEED_USER_PASSWORD"], "User", "seeded user");
     await SeedIdentityUserAsync(userManager, configuration["SEED_STAFF_EMAIL"], configuration["SEED_STAFF_PASSWORD"], "Staff", "seeded staff user");
+
+    await SeedSampleCasesAsync(dbContext, userManager, configuration);
+}
+
+static async Task SeedSampleCasesAsync(
+    ApplicationDbContext dbContext,
+    UserManager<ApplicationUser> userManager,
+    IConfiguration configuration)
+{
+    if (await dbContext.Cases.AnyAsync())
+    {
+        return;
+    }
+
+    var creatorEmails = new[]
+    {
+        configuration["SEED_ADMIN_EMAIL"],
+        configuration["SEED_STAFF_EMAIL"],
+        configuration["SEED_USER_EMAIL"],
+        "admin@local.test"
+    };
+
+    ApplicationUser? creatorUser = null;
+    foreach (var email in creatorEmails.Where(email => !string.IsNullOrWhiteSpace(email)))
+    {
+        creatorUser = await userManager.FindByEmailAsync(email!);
+        if (creatorUser is not null)
+        {
+            break;
+        }
+    }
+
+    creatorUser ??= await userManager.Users.FirstOrDefaultAsync();
+    if (creatorUser is null)
+    {
+        return;
+    }
+
+    ApplicationUser? assignedToUser = null;
+    var assignedToEmail = configuration["SEED_USER_EMAIL"];
+    if (!string.IsNullOrWhiteSpace(assignedToEmail))
+    {
+        assignedToUser = await userManager.FindByEmailAsync(assignedToEmail);
+    }
+
+    var utcNow = DateTime.UtcNow;
+
+    Case CreateCase(string title, string description, WorkflowState status, int daysAgo, int hoursAfterCreated, bool assignToTestUser)
+    {
+        var createdAtUtc = utcNow.AddDays(-daysAgo);
+        var isAssigned = assignToTestUser && assignedToUser is not null;
+
+        return new Case
+        {
+            Title = title,
+            Description = description,
+            Status = isAssigned ? status : WorkflowState.New,
+            CreatedAtUtc = createdAtUtc,
+            UpdatedAtUtc = createdAtUtc.AddHours(hoursAfterCreated),
+            CreatedByUserId = creatorUser.Id,
+            AssignedToUserId = isAssigned ? assignedToUser.Id : null
+        };
+    }
+
+    var sampleCases = new[]
+    {
+        CreateCase("Missing intake paperwork", "The intake packet is missing the signed consent form and needs follow-up with the submitter.", WorkflowState.Assigned, 14, 4, true),
+        CreateCase("Late evidence upload", "Evidence files were uploaded after the review deadline and should be checked for completeness.", WorkflowState.InProgress, 12, 6, true),
+        CreateCase("Address verification needed", "The case file contains an address mismatch between the intake form and the supporting documents.", WorkflowState.Resolved, 10, 3, true),
+        CreateCase("Duplicate reference number", "A duplicate reference number was detected during entry and needs consolidation.", WorkflowState.Closed, 9, 2, true),
+        CreateCase("Unclear supporting note", "The supporting note is readable but does not provide enough detail for a decision.", WorkflowState.New, 8, 1, false),
+        CreateCase("Follow-up call required", "A follow-up call is needed to confirm the next steps with the requester.", WorkflowState.Assigned, 7, 5, true),
+        CreateCase("Pending document review", "The uploaded documents are complete but still waiting for a second review.", WorkflowState.InProgress, 6, 4, true),
+        CreateCase("Verification complete", "Identity and document verification were completed and the record is ready for closure.", WorkflowState.Resolved, 5, 2, true),
+        CreateCase("Historical reference check", "The case is for reference only and does not require immediate action.", WorkflowState.New, 4, 1, false),
+        CreateCase("Archived policy inquiry", "A policy question was answered and the case is ready to remain archived.", WorkflowState.New, 3, 1, false)
+    };
+
+    dbContext.Cases.AddRange(sampleCases);
+    await dbContext.SaveChangesAsync();
 }
 
 static async Task SeedIdentityUserAsync(
