@@ -6,8 +6,24 @@
 <PageTitle>Cases</PageTitle>
 
 <div class="section-header">
-    <h2>@(_isStaffOrAdmin ? "📋 All Cases" : "📋 My Cases")</h2>
-    <p class="section-subheader">@(_isStaffOrAdmin ? "View all cases in the system" : "View your assigned cases")</p>
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h2>@(_isStaffOrAdmin ? "📋 All Cases" : "📋 My Cases")</h2>
+            <p class="section-subheader">@(_isStaffOrAdmin ? "View all cases in the system" : "View your assigned cases")</p>
+        </div>
+        <div class="layout-toggle" role="group" aria-label="Layout options">
+            <button class="btn @(_isListLayout ? "btn-outline-primary" : "btn-primary") btn-sm" 
+                    @onclick="() => _isListLayout = false"
+                    title="Card view">
+                📇 Cards
+            </button>
+            <button class="btn @(_isListLayout ? "btn-primary" : "btn-outline-primary") btn-sm" 
+                    @onclick="() => _isListLayout = true"
+                    title="List view">
+                📋 List
+            </button>
+        </div>
+    </div>
 </div>
 
 @if (!string.IsNullOrEmpty(_errorMessage))
@@ -26,33 +42,73 @@ else if (_cases.Count == 0)
 }
 else
 {
-    <div class="row">
-        @foreach (var workflowCase in _cases)
-        {
-            <div class="col-md-6 col-lg-4 mb-3">
-                <a href="@($"/cases/{workflowCase.Id}")" class="text-decoration-none">
-                    <div class="case-card fade-in status-@GetStatusClass(workflowCase.Status)">
-                        <h5>@workflowCase.Title</h5>
-                        <p class="case-meta mb-2">
-                            <span class="badge @GetBadgeClass(workflowCase.Status)">@FormatStatus(workflowCase.Status)</span>
-                        </p>
-                        <p class="case-meta mb-1">
-                            <strong>ID:</strong> #@workflowCase.Id
-                        </p>
-                        <p class="case-meta">
-                            <strong>Created:</strong> @($"{workflowCase.CreatedAtUtc:g} UTC")
-                        </p>
-                    </div>
-                </a>
-            </div>
-        }
-    </div>
+    @if (_isListLayout)
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var workflowCase in _cases)
+                    {
+                        <tr class="case-list-row" style="cursor: pointer;" @onclick="() => { }">
+                            <td>
+                                <a href="@($"/cases/{workflowCase.Id}")" class="text-decoration-none">
+                                    #@workflowCase.Id
+                                </a>
+                            </td>
+                            <td>
+                                <a href="@($"/cases/{workflowCase.Id}")" class="text-decoration-none">
+                                    @workflowCase.Title
+                                </a>
+                            </td>
+                            <td>
+                                <span class="badge @GetBadgeClass(workflowCase.Status)">@FormatStatus(workflowCase.Status)</span>
+                            </td>
+                            <td>@($"{workflowCase.CreatedAtUtc:g} UTC")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var workflowCase in _cases)
+            {
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <a href="@($"/cases/{workflowCase.Id}")" class="text-decoration-none">
+                        <div class="case-card fade-in status-@GetStatusClass(workflowCase.Status)">
+                            <h5>@workflowCase.Title</h5>
+                            <p class="case-meta mb-2">
+                                <span class="badge @GetBadgeClass(workflowCase.Status)">@FormatStatus(workflowCase.Status)</span>
+                            </p>
+                            <p class="case-meta mb-1">
+                                <strong>ID:</strong> #@workflowCase.Id
+                            </p>
+                            <p class="case-meta">
+                                <strong>Created:</strong> @($"{workflowCase.CreatedAtUtc:g} UTC")
+                            </p>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
 }
 
 @code {
     private IReadOnlyList<secure_workflow_system.Data.Case>? _cases;
     private string? _errorMessage;
     private bool _isStaffOrAdmin;
+    private bool _isListLayout = false;
 
     protected override async Task OnInitializedAsync()
     {

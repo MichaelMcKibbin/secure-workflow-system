@@ -423,3 +423,39 @@
         transform: translateX(0);
     }
 }
+
+/* ============================================
+   LAYOUT TOGGLE & LIST VIEW
+   ============================================ */
+.layout-toggle {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.layout-toggle .btn {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.9rem;
+}
+
+.case-list-row {
+    transition: all 0.2s ease;
+}
+
+.case-list-row:hover {
+    background-color: rgba(102, 153, 155, 0.05);
+}
+
+.case-list-row td {
+    vertical-align: middle;
+}
+
+.case-list-row a {
+    color: var(--color-primary);
+    text-decoration: none;
+}
+
+.case-list-row a:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+}
+
