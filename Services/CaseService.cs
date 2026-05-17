@@ -46,6 +46,8 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
     {
         return await dbContext.Cases
             .AsNoTracking()
+            .Include(c => c.CreatedByUser)
+            .Include(c => c.AssignedToUser)
             .FirstOrDefaultAsync(c => c.Id == caseId && (c.CreatedByUserId == userId || c.AssignedToUserId == userId));
     }
 
@@ -53,6 +55,8 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
     {
         return await dbContext.Cases
             .AsNoTracking()
+            .Include(c => c.CreatedByUser)
+            .Include(c => c.AssignedToUser)
             .FirstOrDefaultAsync(c => c.Id == caseId);
     }
 
@@ -122,6 +126,7 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
     {
         return await dbContext.CaseStatusHistories
             .AsNoTracking()
+            .Include(h => h.ChangedByUser)
             .Where(h => h.CaseId == caseId)
             .OrderByDescending(h => h.ChangedAtUtc)
             .ToListAsync();
