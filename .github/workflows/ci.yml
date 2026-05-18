@@ -35,14 +35,20 @@ jobs:
       - name: Build
         run: dotnet build --configuration Release --no-restore
 
+      - name: Build unit tests
+        run: dotnet build secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj --configuration Release --no-restore
+
+      - name: Build component tests
+        run: dotnet build secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj --configuration Release --no-restore
+
       - name: Unit Tests
-        run: dotnet test secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj --no-build --verbosity normal --logger "console;verbosity=detailed"
+        run: dotnet test secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj --configuration Release --no-build --verbosity normal --logger "console;verbosity=detailed"
 
       - name: Component Tests
-        run: dotnet test secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj --no-build --verbosity normal --logger "console;verbosity=detailed"
+        run: dotnet test secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj --configuration Release --no-build --verbosity normal --logger "console;verbosity=detailed"
 
       - name: Test Coverage
-        run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage" --logger trx
+        run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --logger trx
 
       - name: Format Check
         run: dotnet format --verify-no-changes secure-workflow-system.slnx
