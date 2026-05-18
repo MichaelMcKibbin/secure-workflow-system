@@ -219,7 +219,7 @@ static async Task SeedSampleCasesAsync(
             CreatedAtUtc = createdAtUtc,
             UpdatedAtUtc = createdAtUtc.AddHours(hoursAfterCreated),
             CreatedByUserId = creatorUser.Id,
-            AssignedToUserId = isAssigned ? assignedToUser.Id : null
+            AssignedToUserId = isAssigned && assignedToUser is not null ? assignedToUser.Id : null
         };
     }
 

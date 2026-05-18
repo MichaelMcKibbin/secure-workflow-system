@@ -279,7 +279,13 @@ else
                 return;
             }
 
-            _case = await CaseService.GetCaseByIdAsync(_case.Id);
+            _case = await CaseService.GetCaseByIdAsync(_case?.Id ?? 0);
+
+            if (_case == null)
+            {
+                _errorMessage = "Case not found.";
+                return;
+            }
 
             _statusHistory.Clear();
             var history = await CaseService.GetCaseStatusHistoryAsync(_case.Id);
