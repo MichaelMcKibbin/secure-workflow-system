@@ -168,11 +168,6 @@ static async Task SeedSampleCasesAsync(
     UserManager<ApplicationUser> userManager,
     IConfiguration configuration)
 {
-    if (await dbContext.Cases.AnyAsync())
-    {
-        return;
-    }
-
     var creatorEmails = new[]
     {
         configuration["SEED_ADMIN_EMAIL"],
@@ -237,8 +232,21 @@ static async Task SeedSampleCasesAsync(
         CreateCase("Archived policy inquiry", "A policy question was answered and the case is ready to remain archived.", WorkflowState.New, 3, 1, false)
     };
 
-    dbContext.Cases.AddRange(sampleCases);
-    await dbContext.SaveChangesAsync();
+    var anyAdded = false;
+    foreach (var sample in sampleCases)
+    {
+        var exists = await dbContext.Cases.AnyAsync(c => c.Title == sample.Title && c.CreatedByUserId == sample.CreatedByUserId);
+        if (!exists)
+        {
+            dbContext.Cases.Add(sample);
+            anyAdded = true;
+        }
+    }
+
+    if (anyAdded)
+    {
+        await dbContext.SaveChangesAsync();
+    }
 }
 
 static async Task SeedIdentityUserAsync(
