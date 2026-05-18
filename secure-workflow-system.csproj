@@ -12,6 +12,9 @@
 
   <ItemGroup>
     <None Remove="Docs\troubleshooting_deployment.txt" />
+    <Compile Remove="secure-workflow-system.Tests.Unit\**\*" />
+    <Compile Remove="secure-workflow-system.Tests.Integration\**\*" />
+    <Compile Remove="secure-workflow-system.Tests.Components\**\*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -28,13 +31,24 @@
     <None Include=".github\workflows\ci.yml" />
     <None Include=".github\workflows\deploy.yml" />
     <None Include="secure-workflow-system.slnx" />
+    <None Include="secure-workflow-system.Tests.Components\secure-workflow-system.Tests.Components.csproj" />
+    <None Include="secure-workflow-system.Tests.Unit\secure-workflow-system.Tests.Unit.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.2" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.2" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="10.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="10.0.8">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="10.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="secure-workflow-system.Tests.Integration\bin\Debug\net10.0\" />
+    <Folder Include="secure-workflow-system.Tests.Integration\obj\Debug\net10.0\" />
+    <Folder Include="secure-workflow-system.Tests.Integration\obj\Release\net10.0\" />
   </ItemGroup>
 
 </Project>

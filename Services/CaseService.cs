@@ -8,6 +8,7 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
     public async Task<Case> CreateCaseAsync(string userId, string title, string description)
     {
         var utcNow = DateTime.UtcNow;
+        await EnsureUserExistsAsync(userId);
 
         var workflowCase = new Case
         {
@@ -68,17 +69,11 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
             return false;
         }
 
-        if (!Enum.TryParse<WorkflowState>(status.Trim(), ignoreCase: true, out var newStatus))
-        {
-            return false;
-        }
+        var changedByUserId = string.IsNullOrWhiteSpace(assignedToUserId)
+            ? workflowCase.CreatedByUserId
+            : assignedToUserId;
 
-        workflowCase.Status = newStatus;
-        workflowCase.AssignedToUserId = string.IsNullOrWhiteSpace(assignedToUserId) ? null : assignedToUserId;
-        workflowCase.UpdatedAtUtc = DateTime.UtcNow;
-
-        await dbContext.SaveChangesAsync();
-        return true;
+        return await UpdateCaseStatusAndAssignmentCoreAsync(workflowCase, status, assignedToUserId, changedByUserId);
     }
 
     public async Task<bool> UpdateCaseStatusAndAssignmentAsync(int caseId, string status, string? assignedToUserId, string changedByUserId)
@@ -89,6 +84,21 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
             return false;
         }
 
+        return await UpdateCaseStatusAndAssignmentCoreAsync(workflowCase, status, assignedToUserId, changedByUserId);
+    }
+
+    public async Task<IReadOnlyList<CaseStatusHistory>> GetCaseStatusHistoryAsync(int caseId)
+    {
+        return await dbContext.CaseStatusHistories
+            .AsNoTracking()
+            .Include(h => h.ChangedByUser)
+            .Where(h => h.CaseId == caseId)
+            .OrderByDescending(h => h.ChangedAtUtc)
+            .ToListAsync();
+    }
+
+    private async Task<bool> UpdateCaseStatusAndAssignmentCoreAsync(Case workflowCase, string status, string? assignedToUserId, string changedByUserId)
+    {
         if (!Enum.TryParse<WorkflowState>(status.Trim(), ignoreCase: true, out var newStatus))
         {
             return false;
@@ -101,14 +111,22 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
             return false;
         }
 
+        var effectiveChangedByUserId = string.IsNullOrWhiteSpace(changedByUserId)
+            ? workflowCase.CreatedByUserId
+            : changedByUserId;
+
+        await EnsureUserExistsAsync(workflowCase.CreatedByUserId);
+        await EnsureUserExistsAsync(assignedToUserId);
+        await EnsureUserExistsAsync(effectiveChangedByUserId);
+
         if (statusChanged)
         {
             var history = new CaseStatusHistory
             {
-                CaseId = caseId,
+                CaseId = workflowCase.Id,
                 OldStatus = workflowCase.Status.ToString(),
                 NewStatus = newStatus.ToString(),
-                ChangedByUserId = changedByUserId,
+                ChangedByUserId = effectiveChangedByUserId,
                 ChangedAtUtc = DateTime.UtcNow
             };
             dbContext.CaseStatusHistories.Add(history);
@@ -122,13 +140,24 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
         return true;
     }
 
-    public async Task<IReadOnlyList<CaseStatusHistory>> GetCaseStatusHistoryAsync(int caseId)
+    private async Task EnsureUserExistsAsync(string? userId)
     {
-        return await dbContext.CaseStatusHistories
-            .AsNoTracking()
-            .Include(h => h.ChangedByUser)
-            .Where(h => h.CaseId == caseId)
-            .OrderByDescending(h => h.ChangedAtUtc)
-            .ToListAsync();
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            return;
+        }
+
+        var exists = await dbContext.Users.AnyAsync(user => user.Id == userId);
+        if (exists)
+        {
+            return;
+        }
+
+        dbContext.Users.Add(new ApplicationUser
+        {
+            Id = userId,
+            UserName = userId,
+            NormalizedUserName = userId.ToUpperInvariant()
+        });
     }
 }
