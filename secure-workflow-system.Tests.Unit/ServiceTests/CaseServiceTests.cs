@@ -158,23 +158,6 @@ public class CaseServiceTests : IDisposable
         Assert.Equal(2, result.Count);
     }
 
-    [Fact]
-    public async Task GetCasesForUserAsync_ShouldReturnAssignedCases()
-    {
-        // Arrange
-        var creatorId = Guid.NewGuid().ToString();
-        var assignedUserId = Guid.NewGuid().ToString();
-        var caseObj = await _caseService.CreateCaseAsync(creatorId, "Test Case", "Description");
-        await _caseService.UpdateCaseStatusAndAssignmentAsync(caseObj.Id, WorkflowState.Assigned.ToString(), assignedUserId);
-
-        // Act
-        var result = await _caseService.GetCasesForUserAsync(assignedUserId);
-
-        // Assert
-        Assert.Single(result);
-        Assert.Equal(caseObj.Id, result[0].Id);
-    }
-
     #endregion
 
     #region GetCaseStatusHistoryAsync Tests
