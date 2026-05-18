@@ -24,10 +24,10 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore solution
-        run: dotnet restore secure-workflow-system.slnx
+        run: dotnet restore
 
       - name: Build solution
-        run: dotnet build secure-workflow-system.slnx --configuration Release --no-restore
+        run: dotnet build secure-workflow-system.slnx --configuration Release
 
       - name: Format Check
         run: dotnet format --verify-no-changes secure-workflow-system.slnx
