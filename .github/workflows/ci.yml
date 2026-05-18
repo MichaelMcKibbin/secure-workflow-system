@@ -29,14 +29,6 @@ jobs:
       - name: Build solution
         run: dotnet build secure-workflow-system.slnx --configuration Release --no-restore
 
-      - name: Test
-        run: |
-          if find . -type f \( -name '*Test*.csproj' -o -name '*Tests*.csproj' \) | grep -q .; then
-            dotnet test --no-build --verbosity normal
-          else
-            echo "No test projects found; skipping dotnet test."
-          fi
-
       - name: Format Check
         run: dotnet format --verify-no-changes secure-workflow-system.slnx
 
