@@ -1,0 +1,123 @@
+@page "/stats"
+@attribute [StreamRendering]
+@inject secure_workflow_system.Services.ICaseService CaseService
+
+<PageTitle>Case Statistics</PageTitle>
+
+<h1>Case Statistics</h1>
+
+@if (_cases is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (_cases.Count == 0)
+{
+    <div class="alert alert-info">No cases available.</div>
+}
+else
+{
+    <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="card p-3">
+                <h5>Total cases</h5>
+                <p class="display-6">@_totalCases</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3">
+                <h5>Open cases</h5>
+                <p class="display-6">@_openCases</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3">
+                <h5>Closed/Resolved</h5>
+                <p class="display-6">@_closedCases</p>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card p-3">
+                <h5>Avg days (open)</h5>
+                <p class="display-6">@(_avgDaysOpen.HasValue ? _avgDaysOpen.Value.ToString("0.0") : "—")</p>
+            </div>
+        </div>
+    </div>
+
+    <h4>Counts by status</h4>
+    <table class="table table-sm">
+        <thead>
+            <tr><th>Status</th><th>Count</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var kv in _countsByStatus)
+            {
+                <tr>
+                    <td>@kv.Key</td>
+                    <td>@kv.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Oldest open cases</h4>
+    <table class="table table-hover">
+        <thead>
+            <tr><th>ID</th><th>Title</th><th>Days Open</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+            @foreach (var c in _oldestOpen)
+            {
+                <tr>
+                    <td><a href="/cases/@c.Id">#@c.Id</a></td>
+                    <td>@c.Title</td>
+                    <td>@((DateTime.UtcNow - c.CreatedAtUtc).TotalDays.ToString("0.0"))</td>
+                    <td>@c.Status</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IReadOnlyList<secure_workflow_system.Data.Case>? _cases;
+    private int _totalCases;
+    private int _openCases;
+    private int _closedCases;
+    private double? _avgDaysOpen;
+    private Dictionary<string,int> _countsByStatus = new();
+    private List<secure_workflow_system.Data.Case> _oldestOpen = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _cases = await CaseService.GetAllCasesAsync();
+            if (_cases is null || _cases.Count == 0)
+            {
+                return;
+            }
+
+            _totalCases = _cases.Count;
+
+            var openStatuses = new[] { secure_workflow_system.Data.WorkflowState.New, secure_workflow_system.Data.WorkflowState.Assigned, secure_workflow_system.Data.WorkflowState.InProgress };
+            var closedStatuses = new[] { secure_workflow_system.Data.WorkflowState.Resolved, secure_workflow_system.Data.WorkflowState.Closed };
+
+            _openCases = _cases.Count(c => openStatuses.Contains(c.Status));
+            _closedCases = _cases.Count(c => closedStatuses.Contains(c.Status));
+
+            var openCasesList = _cases.Where(c => openStatuses.Contains(c.Status)).ToList();
+            if (openCasesList.Count > 0)
+            {
+                _avgDaysOpen = openCasesList.Average(c => (DateTime.UtcNow - c.CreatedAtUtc).TotalDays);
+                _oldestOpen = openCasesList.OrderByDescending(c => (DateTime.UtcNow - c.CreatedAtUtc).TotalDays).Take(10).ToList();
+            }
+
+            _countsByStatus = _cases.GroupBy(c => c.Status.ToString())
+                                     .ToDictionary(g => g.Key, g => g.Count());
+        }
+        catch
+        {
+            _cases = [];
+        }
+    }
+}
