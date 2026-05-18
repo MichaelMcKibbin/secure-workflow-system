@@ -23,11 +23,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore main project
-        run: dotnet restore secure-workflow-system.csproj
+      - name: Restore solution
+        run: dotnet restore secure-workflow-system.slnx
 
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
+      - name: Build solution
+        run: dotnet build secure-workflow-system.slnx --configuration Release --no-restore
 
       - name: Test
         run: |
