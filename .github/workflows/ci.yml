@@ -23,8 +23,14 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore
-        run: dotnet restore
+      - name: Restore main project
+        run: dotnet restore secure-workflow-system.csproj
+
+      - name: Restore unit tests
+        run: dotnet restore secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj
+
+      - name: Restore component tests
+        run: dotnet restore secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj
 
       - name: Build
         run: dotnet build --configuration Release --no-restore
