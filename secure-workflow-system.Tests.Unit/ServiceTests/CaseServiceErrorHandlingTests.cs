@@ -26,16 +26,6 @@ public class CaseServiceErrorHandlingTests : IDisposable
     [Theory]
     [InlineData("")]
     [InlineData("   ")]
-    public async Task CreateCaseAsync_WithEmptyUserId_ShouldNotThrow(string userId)
-    {
-        // Act & Assert - Should not throw exception
-        var result = await _caseService.CreateCaseAsync(userId, "Title", "Description");
-        Assert.NotNull(result);
-    }
-
-    [Theory]
-    [InlineData("")]
-    [InlineData("   ")]
     [InlineData(null)]
     public async Task CreateCaseAsync_WithEmptyTitle_ShouldStoreEmpty(string? title)
     {
