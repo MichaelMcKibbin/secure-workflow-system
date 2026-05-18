@@ -1,5 +1,9 @@
 ﻿<Solution>
   <Project Path="secure-workflow-system.csproj" />
-  <Project Path="secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj" />
-  <Project Path="secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj" />
+  <Project Path="secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
+  <Project Path="secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj">
+    <Build Solution="Debug|*" Project="false" />
+  </Project>
 </Solution>
