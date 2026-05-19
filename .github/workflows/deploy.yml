@@ -41,9 +41,9 @@ jobs:
           fi
           dotnet --info
 
-      # Build the whole solution (allow the build to restore if needed)
+      # Build the whole solution
       - name: Build application
-        run: dotnet build secure-workflow-system.slnx --configuration Release
+        run: dotnet build secure-workflow-system.slnx --configuration Release --no-restore
 
       - name: Login to GHCR
         uses: docker/login-action@v3
