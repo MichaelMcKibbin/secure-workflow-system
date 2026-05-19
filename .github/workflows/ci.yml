@@ -27,7 +27,7 @@ jobs:
         run: dotnet restore
 
       - name: Build solution
-        run: dotnet build secure-workflow-system.slnx --configuration Release
+        run: dotnet build secure-workflow-system.slnx --configuration Release --no-restore
 
       - name: Format Check
         run: dotnet format --verify-no-changes secure-workflow-system.slnx
