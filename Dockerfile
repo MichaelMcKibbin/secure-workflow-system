@@ -4,7 +4,7 @@ WORKDIR /src
 
 COPY . .
 RUN dotnet restore secure-workflow-system.slnx
-RUN dotnet publish -c Release -o /app/publish
+RUN dotnet publish secure-workflow-system/secure-workflow-system.csproj -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
