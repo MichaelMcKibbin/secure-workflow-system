@@ -1,5 +1,6 @@
 @page "/stats"
 @attribute [StreamRendering]
+@attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "CanViewCases")]
 @inject secure_workflow_system.Services.ICaseService CaseService
 
 <PageTitle>Case Statistics</PageTitle>
