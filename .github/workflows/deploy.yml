@@ -25,15 +25,23 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore secure-workflow-system.slnx
+        run: dotnet restore secure-workflow-system.slnx --verbosity minimal
 
-      - name: "Debug: list restored assets"
+      - name: "Debug: verify restored assets"
+        if: ${{ always() }}
         run: |
           echo "Working dir: $(pwd)"
-          find . -type f -name project.assets.json -print || echo "No project.assets.json files found"
+          echo "List solution files:"
+          ls -la
+          echo "Find project.assets.json files (show paths):"
+          if [ -n "$(find . -type f -name project.assets.json -print -quit)" ]; then
+            find . -type f -name project.assets.json -print
+          else
+            echo "No project.assets.json files found"
+          fi
           dotnet --info
-          dotnet restore secure-workflow-system.slnx --verbosity minimal
 
+      # Build the whole solution
       - name: Build application
         run: dotnet build secure-workflow-system.slnx --configuration Release --no-restore
 
