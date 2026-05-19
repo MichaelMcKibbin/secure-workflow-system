@@ -1,21 +1,34 @@
+# Dockerfile
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
-# Copy solution and project files first to leverage layer cache for restore
+# Copy solution + project files first for caching and a correct restore context
 COPY secure-workflow-system.slnx ./
 COPY secure-workflow-system.csproj ./
 COPY secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj ./secure-workflow-system.Tests.Components/
 COPY secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj ./secure-workflow-system.Tests.Unit/
 
-# Restore the solution (use minimal/diagnostic temporarily if you need logs)
-RUN dotnet restore secure-workflow-system.slnx --verbosity diagnostic
+# Show environment and installed sdks/runtimes (diagnostic)
+RUN dotnet --info || true
+RUN dotnet --list-sdks || true
+RUN dotnet --list-runtimes || true
+RUN ls -la /usr/share/dotnet/sdk || true
 
-# Copy everything else and publish the app
+# Restore the entire solution (increase verbosity if you need more detail)
+RUN dotnet restore secure-workflow-system.slnx --verbosity minimal
+
+# Copy the rest of the repo
 COPY . .
+
+# Before publish: re-check dotnet info and SDK folders (diagnostic)
+RUN dotnet --info
+RUN ls -la /usr/share/dotnet/sdk || true
+
+# Publish the app (no-restore because we already restored)
+# If this fails, change --verbosity to diagnostic to capture more details:
 RUN dotnet publish secure-workflow-system.csproj -c Release -o /app/publish --no-restore
 
-# Runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:8080
