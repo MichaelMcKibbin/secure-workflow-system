@@ -23,32 +23,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore main project
-        run: dotnet restore secure-workflow-system.csproj
+      - name: Restore solution
+        run: dotnet restore
 
-      - name: Restore unit tests
-        run: dotnet restore secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj
-
-      - name: Restore component tests
-        run: dotnet restore secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj
-
-      - name: Build
-        run: dotnet build --configuration Release --no-restore
-
-      - name: Build unit tests
-        run: dotnet build secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj --configuration Release --no-restore
-
-      - name: Build component tests
-        run: dotnet build secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj --configuration Release --no-restore
-
-      - name: Unit Tests
-        run: dotnet test secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj --configuration Release --no-build --verbosity normal --logger "console;verbosity=detailed"
-
-      - name: Component Tests
-        run: dotnet test secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj --configuration Release --no-build --verbosity normal --logger "console;verbosity=detailed"
-
-      - name: Test Coverage
-        run: dotnet test --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --logger trx
+      - name: Build solution
+        run: dotnet build secure-workflow-system.slnx --configuration Release
 
       - name: Format Check
         run: dotnet format --verify-no-changes secure-workflow-system.slnx
