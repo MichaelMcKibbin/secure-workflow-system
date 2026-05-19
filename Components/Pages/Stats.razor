@@ -2,12 +2,17 @@
 @attribute [StreamRendering]
 @attribute [Microsoft.AspNetCore.Authorization.Authorize(Policy = "CanViewCases")]
 @inject secure_workflow_system.Services.ICaseService CaseService
+@inject ILogger<Stats> Logger
 
 <PageTitle>Case Statistics</PageTitle>
 
 <h1>Case Statistics</h1>
 
-@if (_cases is null)
+@if (!string.IsNullOrEmpty(_errorMessage))
+{
+    <div class="alert alert-danger" role="alert">@_errorMessage</div>
+}
+else if (_cases is null)
 {
     <p><em>Loading...</em></p>
 }
@@ -85,6 +90,7 @@ else
     private int _openCases;
     private int _closedCases;
     private double? _avgDaysOpen;
+    private string? _errorMessage;
     private Dictionary<string,int> _countsByStatus = new();
     private List<secure_workflow_system.Data.Case> _oldestOpen = new();
 
@@ -116,8 +122,10 @@ else
             _countsByStatus = _cases.GroupBy(c => c.Status.ToString())
                                      .ToDictionary(g => g.Key, g => g.Count());
         }
-        catch
+        catch (Exception ex)
         {
+            Logger.LogError(ex, "Failed to load case statistics.");
+            _errorMessage = "Unable to load case statistics. Please refresh the page, or contact support if the problem persists.";
             _cases = [];
         }
     }
