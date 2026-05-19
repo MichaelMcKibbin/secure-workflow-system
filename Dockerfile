@@ -3,8 +3,8 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY . .
-RUN dotnet restore secure-workflow-system.csproj
-RUN dotnet publish secure-workflow-system.csproj -c Release -o /app/publish --no-restore
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/publish
 
 # Runtime stage
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
