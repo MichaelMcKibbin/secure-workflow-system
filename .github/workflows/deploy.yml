@@ -25,17 +25,21 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore secure-workflow-system.slnx
+        run: dotnet restore secure-workflow-system.slnx --verbosity minimal
 
-      - name: "Debug: list restored assets"
+      - name: "Debug: verify restored assets"
+        if: ${{ always() }}
         run: |
           echo "Working dir: $(pwd)"
+          echo "List solution files:"
+          ls -la
+          echo "Find project.assets.json files (show paths):"
           find . -type f -name project.assets.json -print || echo "No project.assets.json files found"
           dotnet --info
-          dotnet restore secure-workflow-system.slnx --verbosity minimal
 
+      # Build the whole solution (allow the build to restore if needed)
       - name: Build application
-        run: dotnet build secure-workflow-system.slnx --configuration Release --no-restore
+        run: dotnet build secure-workflow-system.slnx --configuration Release
 
       - name: Login to GHCR
         uses: docker/login-action@v3
