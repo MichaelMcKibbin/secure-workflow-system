@@ -8,7 +8,7 @@ COPY secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Compon
 COPY secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj ./secure-workflow-system.Tests.Unit/
 
 # Restore the solution (use minimal/diagnostic temporarily if you need logs)
-RUN dotnet restore secure-workflow-system.slnx --verbosity minimal
+RUN dotnet restore secure-workflow-system.slnx --verbosity diagnostic
 
 # Copy everything else and publish the app
 COPY . .
