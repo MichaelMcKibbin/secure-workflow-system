@@ -39,7 +39,11 @@ jobs:
           echo "List solution files:"
           ls -la
           echo "Find project.assets.json files (show paths):"
-          find . -type f -name project.assets.json -print || echo "No project.assets.json files found"
+          if [ -n "$(find . -type f -name project.assets.json -print -quit)" ]; then
+            find . -type f -name project.assets.json -print
+          else
+            echo "No project.assets.json files found"
+          fi
           dotnet --info
 
       - name: Build application
