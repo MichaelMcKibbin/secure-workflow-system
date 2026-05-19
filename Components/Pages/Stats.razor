@@ -8,13 +8,13 @@
 
 <h1>Case Statistics</h1>
 
-@if (_cases is null)
-{
-    <p><em>Loading...</em></p>
-}
-else if (!string.IsNullOrEmpty(_errorMessage))
+@if (!string.IsNullOrEmpty(_errorMessage))
 {
     <div class="alert alert-danger" role="alert">@_errorMessage</div>
+}
+else if (_cases is null)
+{
+    <p><em>Loading...</em></p>
 }
 else if (_cases.Count == 0)
 {
@@ -125,7 +125,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Failed to load case statistics.");
-            _errorMessage = "Unable to load case statistics right now.";
+            _errorMessage = "Unable to load case statistics. Please refresh the page, or contact support if the problem persists.";
             _cases = [];
         }
     }
