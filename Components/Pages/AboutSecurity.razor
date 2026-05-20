@@ -1,0 +1,48 @@
+﻿@page "/aboutsecurity"
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>About Security</PageTitle>
+
+<h1>About Security</h1>
+
+<AuthorizeView>
+    <Authorized>
+        <p>This application enforces authentication and role-based authorization using ASP.NET Core Identity. Access is restricted to authorized users for sensitive operations, and roles such as Admin, Staff, and User are used to control permissions.</p>
+
+        <h4>Key controls</h4>
+        <ul>
+            <li>
+                <strong>Authentication</strong>: ASP.NET Core Identity with secure password policies, email confirmation, and optional passkeys. Password policy requires a mix of upper/lowercase, digits, and non-alphanumeric characters.
+            </li>
+            <li>
+                <strong>Authorization</strong>: Role-based policies (Admin, Staff, User) protect endpoints and UI actions. Critical operations require Admin or Staff roles and are enforced server-side in services and controllers.
+            </li>
+            <li>
+                <strong>Data protection</strong>: Application data protection keys can be persisted to a shared key ring (configured via DataProtection:KeyRingPath). This ensures data protection keys survive restarts and can be shared between instances.
+            </li>
+            <li>
+                <strong>Database migrations</strong>: On startup the application attempts to apply migrations (MigrateAsync) with retry logic. CI builds do not apply migrations automatically; deployments should run migrations as a controlled step.
+            </li>
+            <li>
+                <strong>CI/CD and secrets</strong>: Deployment secrets (e.g., seed accounts) are provided via repository secrets and written into env files during deploy. Never commit secrets to the repository.
+            </li>
+            <li>
+                <strong>Container security</strong>: Docker images are built from minimal base images and scanned in pipeline. Container runtime uses environment-based configuration and does not store secrets in code.
+            </li>
+            <li>
+                <strong>Logging and monitoring</strong>: Startup logs include migration and seed activities. Configure external logging/monitoring (e.g., syslog, Azure Monitor) in production for auditability.
+            </li>
+        </ul>
+
+        <p>If you need more detail about a specific control, contact an administrator or view the repository Docs folder for operational guidance.</p>
+    </Authorized>
+    <NotAuthorized>
+        <div class="alert alert-warning">You are not authorized to view this page. Please <a href="/Account/Login">log in</a> with an account that has access.</div>
+    </NotAuthorized>
+</AuthorizeView>
+<h3>AboutSecurity</h3>
+
+@code {
+
+}
