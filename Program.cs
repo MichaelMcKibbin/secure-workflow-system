@@ -229,7 +229,7 @@ static async Task SeedSampleCasesAsync(
         CreateCase("Pending document review", "The uploaded documents are complete but still waiting for a second review.", WorkflowState.InProgress, 6, 4, true),
         CreateCase("Verification complete", "Identity and document verification were completed and the record is ready for closure.", WorkflowState.Resolved, 5, 2, true),
         CreateCase("Historical reference check", "The case is for reference only and does not require immediate action.", WorkflowState.New, 4, 1, false),
-        CreateCase("Archived policy inquiry", "A policy question was answered and the case is ready to remain archived.", WorkflowState.New, 3, 1, false),
+        CreateCase("Archived policy follow-up", "A policy question was answered and the case is ready to remain archived.", WorkflowState.New, 3, 1, false),
         CreateCase("Incomplete consent form", "Consent form missing signature on page 2.", WorkflowState.Assigned, 20, 2, true),
         CreateCase("Missing ID verification", "ID document not provided with submission.", WorkflowState.InProgress, 18, 3, true),
         CreateCase("Payment discrepancy", "Payment amount does not match invoice.", WorkflowState.New, 17, 1, false),
@@ -247,7 +247,7 @@ static async Task SeedSampleCasesAsync(
         CreateCase("External system outage", "Processing delayed due to external outage.", WorkflowState.Closed, 3, 1, true),
         CreateCase("Address confirmation", "Confirm mailing address provided.", WorkflowState.New, 2, 1, false),
         CreateCase("Duplicate attachment", "Attachment uploaded twice; dedupe required.", WorkflowState.Resolved, 1, 1, true),
-        CreateCase("Staff training case", "Case created for staff training purposes.", WorkflowState.Closed, 21, 0, false),
+        CreateCase("Staff training case", "Case created for staff training purposes.", WorkflowState.New, 21, 0, false),
         CreateCase("Audit follow-up", "Follow-up requested after audit review.", WorkflowState.InProgress, 22, 5, true),
         CreateCase("Reopen request", "Requester asked to reopen a recently closed case.", WorkflowState.Assigned, 23, 2, true),
         CreateCase("Archived policy inquiry", "A policy question was answered and the case is ready to remain archived.", WorkflowState.New, 3, 1, false)
