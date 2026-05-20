@@ -229,6 +229,27 @@ static async Task SeedSampleCasesAsync(
         CreateCase("Pending document review", "The uploaded documents are complete but still waiting for a second review.", WorkflowState.InProgress, 6, 4, true),
         CreateCase("Verification complete", "Identity and document verification were completed and the record is ready for closure.", WorkflowState.Resolved, 5, 2, true),
         CreateCase("Historical reference check", "The case is for reference only and does not require immediate action.", WorkflowState.New, 4, 1, false),
+        CreateCase("Archived policy inquiry", "A policy question was answered and the case is ready to remain archived.", WorkflowState.New, 3, 1, false),
+        CreateCase("Incomplete consent form", "Consent form missing signature on page 2.", WorkflowState.Assigned, 20, 2, true),
+        CreateCase("Missing ID verification", "ID document not provided with submission.", WorkflowState.InProgress, 18, 3, true),
+        CreateCase("Payment discrepancy", "Payment amount does not match invoice.", WorkflowState.New, 17, 1, false),
+        CreateCase("System import error", "Record failed to import due to formatting error.", WorkflowState.Resolved, 16, 2, true),
+        CreateCase("User follow-up needed", "Clarify requested information from user.", WorkflowState.Assigned, 15, 2, true),
+        CreateCase("Data reconciliation", "Reconcile incoming data against master records.", WorkflowState.InProgress, 13, 4, true),
+        CreateCase("Expired documentation", "Documentation expired before review.", WorkflowState.Closed, 11, 1, true),
+        CreateCase("Quality assurance review", "QA flagged missing supporting files.", WorkflowState.Resolved, 10, 2, true),
+        CreateCase("Incorrect category assigned", "Case categorized incorrectly; needs reassignment.", WorkflowState.New, 9, 1, false),
+        CreateCase("Late responder", "External party delayed providing necessary info.", WorkflowState.Assigned, 8, 3, true),
+        CreateCase("Multiple submissions", "Duplicate submissions detected for same requester.", WorkflowState.InProgress, 7, 2, true),
+        CreateCase("Urgent escalation", "High-priority escalation requested by staff.", WorkflowState.Assigned, 6, 6, true),
+        CreateCase("Follow-up documentation", "Awaiting additional documents for closure.", WorkflowState.New, 5, 1, false),
+        CreateCase("Policy clarification", "Clarify policy interpretation for reviewer.", WorkflowState.Resolved, 4, 2, true),
+        CreateCase("External system outage", "Processing delayed due to external outage.", WorkflowState.Closed, 3, 1, true),
+        CreateCase("Address confirmation", "Confirm mailing address provided.", WorkflowState.New, 2, 1, false),
+        CreateCase("Duplicate attachment", "Attachment uploaded twice; dedupe required.", WorkflowState.Resolved, 1, 1, true),
+        CreateCase("Staff training case", "Case created for staff training purposes.", WorkflowState.Closed, 21, 0, false),
+        CreateCase("Audit follow-up", "Follow-up requested after audit review.", WorkflowState.InProgress, 22, 5, true),
+        CreateCase("Reopen request", "Requester asked to reopen a recently closed case.", WorkflowState.Assigned, 23, 2, true)
         CreateCase("Archived policy inquiry", "A policy question was answered and the case is ready to remain archived.", WorkflowState.New, 3, 1, false)
     };
 
