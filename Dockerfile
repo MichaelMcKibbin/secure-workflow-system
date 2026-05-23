@@ -5,8 +5,8 @@ WORKDIR /src
 # Copy solution + project files first for caching and a correct restore context
 COPY secure-workflow-system.slnx ./
 COPY secure-workflow-system.csproj ./
-COPY secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj ./secure-workflow-system.Tests.Components/
-COPY secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj ./secure-workflow-system.Tests.Unit/
+# COPY secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj ./========== Build completed at 21:06 and took 00.067 seconds ==========.Components/
+# COPY secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj ./secure-workflow-system.Tests.Unit/
 
 # Show environment and installed sdks/runtimes (diagnostic)
 RUN dotnet --info || true
