@@ -1,14 +1,11 @@
-Thank you for specifying that your concern is with the PostgreSQL setup and slow application startup. Performance issues around PostgreSQL can result from several root causes—often involving the way the database is initialized, seeded with data, or how connections are handled in app startup routines.
+This document provides an evidence-driven review of PostgreSQL setup in the repository, focusing on likely causes of slow application startup and practical improvement steps.
 
-I will review the PostgreSQL setup in the MichaelMcKibbin/secure-workflow-system repo and look for typical inefficiencies such as:
-
+Investigation scope:
 - Database container or service startup delays (Dockerfile/docker-compose or scripts)
 - Excessive or unnecessary migrations/seeding on each start
 - Synchronous waits or health checks in the startup process
 - Inefficient connection handling or configuration
 - Large scripts run at startup
-
-I will inspect relevant configuration files (like Dockerfile, docker-compose, and any scripts related to database initialization), as well as pertinent app code that runs at startup.You're noticing slow application startup and suspect inefficiencies in the PostgreSQL setup. Here’s an evidence-driven review of the repo's setup and likely causes for slowness, plus improvement tips:
 
 ### 1. Automatic Database Migration and Seeding at Startup
 Per the README, in development the app:
