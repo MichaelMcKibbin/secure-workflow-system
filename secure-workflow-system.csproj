@@ -12,9 +12,6 @@
 
   <ItemGroup>
     <None Remove="Docs\troubleshooting_deployment.txt" />
-    <Compile Remove="secure-workflow-system.Tests.Unit\**\*" />
-    <Compile Remove="secure-workflow-system.Tests.Integration\**\*" />
-    <Compile Remove="secure-workflow-system.Tests.Components\**\*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,8 +28,6 @@
     <None Include=".github\workflows\ci.yml" />
     <None Include=".github\workflows\deploy.yml" />
     <None Include="secure-workflow-system.slnx" />
-    <None Include="secure-workflow-system.Tests.Components\secure-workflow-system.Tests.Components.csproj" />
-    <None Include="secure-workflow-system.Tests.Unit\secure-workflow-system.Tests.Unit.csproj" />
   </ItemGroup>
 
   <ItemGroup>

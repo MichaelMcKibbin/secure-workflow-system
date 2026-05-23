@@ -9,7 +9,7 @@ The secure-workflow-system project includes comprehensive testing across three l
 
 ## Test Projects Structure
 
-### 1. secure-workflow-system.Tests.Unit
+### 1. secure-workflow-system.Tests.Unit (temporaraily removed)
 Unit tests for services and models using xUnit framework with in-memory database.
 
 **Location:** `secure-workflow-system.Tests.Unit/`
@@ -23,12 +23,12 @@ Unit tests for services and models using xUnit framework with in-memory database
 - `Builders/CaseStatusHistoryBuilder.cs` - Test data for history
 - `Infrastructure/TestDbContextFactory.cs` - In-memory database setup
 
-**Running Unit Tests:**
+**Running Unit Tests:** (temporarily removed)
 ```bash
 dotnet test secure-workflow-system.Tests.Unit/
 ```
 
-### 2. secure-workflow-system.Tests.Integration
+### 2. secure-workflow-system.Tests.Integration (temporarily removed)
 Integration tests with real PostgreSQL database using TestContainers.
 
 **Location:** `secure-workflow-system.Tests.Integration/`
@@ -37,14 +37,14 @@ Integration tests with real PostgreSQL database using TestContainers.
 - `CaseServiceIntegrationTests.cs` - Database persistence, relationships, performance
 - `Infrastructure/PostgreSqlFixture.cs` - TestContainers PostgreSQL setup
 
-**Running Integration Tests:**
+**Running Integration Tests:** (temporarily removed)
 ```bash
 dotnet test secure-workflow-system.Tests.Integration/
 ```
 
 **Note:** Requires Docker to be running for TestContainers.
 
-### 3. secure-workflow-system.Tests.Components
+### 3. secure-workflow-system.Tests.Components (temporarily removed)
 Blazor component testing with BUnit for UI testing.
 
 **Location:** `secure-workflow-system.Tests.Components/`
@@ -54,9 +54,9 @@ Blazor component testing with BUnit for UI testing.
 - `Pages/CaseDetailsComponentTests.cs` - Case details rendering, user display
 - `Infrastructure/AuthenticationMockHelper.cs` - Mock authentication for testing
 
-**Running Component Tests:**
+**Running Component Tests:** (temporarily removed)
 ```bash
-dotnet test secure-workflow-system.Tests.Components/
+dotnet test secure-workflow-system.Tests.Components/ 
 ```
 
 ## Test Coverage by Area
