@@ -253,21 +253,13 @@ static async Task SeedSampleCasesAsync(
         CreateCase("Archived policy inquiry", "A policy question was answered and the case is ready to remain archived.", WorkflowState.New, 3, 1, false)
     };
 
-    var anyAdded = false;
-    foreach (var sample in sampleCases)
+    if (await dbContext.Cases.AnyAsync())
     {
-        var exists = await dbContext.Cases.AnyAsync(c => c.Title == sample.Title && c.CreatedByUserId == sample.CreatedByUserId);
-        if (!exists)
-        {
-            dbContext.Cases.Add(sample);
-            anyAdded = true;
-        }
+        return;
     }
 
-    if (anyAdded)
-    {
-        await dbContext.SaveChangesAsync();
-    }
+    dbContext.Cases.AddRange(sampleCases);
+    await dbContext.SaveChangesAsync();
 }
 
 static async Task SeedIdentityUserAsync(
