@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <None Remove="Docs\troubleshooting_deployment.txt" />
+    <Compile Remove="tests\**\*" />
   </ItemGroup>
 
   <ItemGroup>

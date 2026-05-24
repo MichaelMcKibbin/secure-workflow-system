@@ -9,7 +9,7 @@ The secure-workflow-system project includes comprehensive testing across three l
 
 ## Test Projects Structure
 
-### 1. secure-workflow-system.Tests.Unit (temporaraily removed)
+### 1. secure-workflow-system.Tests.Unit (new)
 Unit tests for services and models using xUnit framework with in-memory database.
 
 **Location:** `secure-workflow-system.Tests.Unit/`

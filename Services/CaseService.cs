@@ -147,6 +147,12 @@ public class CaseService(ApplicationDbContext dbContext) : ICaseService
             return;
         }
 
+        var alreadyTracked = dbContext.Users.Local.Any(u => u.Id == userId);
+        if (alreadyTracked)
+        {
+            return;
+        }
+
         var exists = await dbContext.Users.AnyAsync(user => user.Id == userId);
         if (exists)
         {
