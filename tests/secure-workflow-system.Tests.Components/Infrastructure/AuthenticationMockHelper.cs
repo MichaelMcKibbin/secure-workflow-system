@@ -11,6 +11,7 @@ public static class AuthenticationMockHelper
     /// <summary>
     /// Registers a fake authenticated user with the given roles into the bUnit test context.
     /// </summary>
+    [Obsolete]
     public static void AddAuthenticatedUser(
         this TestContext ctx,
         string userId,
@@ -61,6 +62,7 @@ public static class AuthenticationMockHelper
     /// <summary>
     /// Registers an unauthenticated (anonymous) user into the bUnit test context.
     /// </summary>
+    [Obsolete]
     public static void AddAnonymousUser(this TestContext ctx)
     {
         var principal = new ClaimsPrincipal(new ClaimsIdentity());

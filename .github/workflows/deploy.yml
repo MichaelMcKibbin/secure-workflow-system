@@ -24,13 +24,11 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
-      - name: Restore solution
-        run: dotnet restore secure-workflow-system.slnx --verbosity minimal
-
-      - name: Restore test projects (explicit)
+      - name: Restore application project
+        # Only restore the application project during deployment. Test projects are omitted to avoid pulling test-only
+        # dependencies and to speed up the deploy pipeline; tests should run in a separate CI workflow.
         run: |
-          dotnet restore secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj --verbosity minimal || true
-          dotnet restore secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj --verbosity minimal || true
+          dotnet restore secure-workflow-system.csproj --verbosity minimal
 
       - name: "Debug: verify restored assets"
         if: ${{ always() }}
@@ -47,7 +45,7 @@ jobs:
           dotnet --info
 
       - name: Build application
-        run: dotnet build secure-workflow-system.slnx --configuration Release --no-restore
+        run: dotnet build secure-workflow-system.csproj --configuration Release --no-restore
 
       - name: Login to GHCR
         uses: docker/login-action@v3
