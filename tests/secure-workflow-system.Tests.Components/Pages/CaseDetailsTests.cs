@@ -378,8 +378,11 @@ public class CaseDetailsTests : TestContext
 
         var updatedCase = new Case
         {
-            Id = 1, Title = "Test Case Title", Description = "Desc",
-            Status = WorkflowState.Assigned, CreatedAtUtc = DateTime.UtcNow,
+            Id = 1,
+            Title = "Test Case Title",
+            Description = "Desc",
+            Status = WorkflowState.Assigned,
+            CreatedAtUtc = DateTime.UtcNow,
             CreatedByUserId = "user-1",
             CreatedByUser = new ApplicationUser { Id = "user-1", UserName = "testuser" }
         };
