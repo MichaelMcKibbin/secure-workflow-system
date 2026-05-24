@@ -93,7 +93,8 @@ jobs:
             echo "SEED_USER_PASSWORD=${{ secrets.SEED_USER_PASSWORD }}" >> workflow.env
             echo "SEED_STAFF_EMAIL=${{ secrets.SEED_STAFF_EMAIL }}" >> workflow.env
             echo "SEED_STAFF_PASSWORD=${{ secrets.SEED_STAFF_PASSWORD }}" >> workflow.env
-            echo "DataProtection__KeyRingPath=/var/lib/workflow/dpkeys" >> workflow.env
+            # Persist data protection keys to the same path that the docker-compose volume mounts inside the container
+            echo "DataProtection__KeyRingPath=/home/app/.aspnet/DataProtection-Keys" >> workflow.env
 
             docker compose -p workflow --env-file workflow.env pull
             docker compose -p workflow --env-file workflow.env up -d --force-recreate
