@@ -75,7 +75,17 @@ if (!string.IsNullOrWhiteSpace(keyRingPath))
 
 var app = builder.Build();
 
-await SeedIdentityAsync(app);
+LogDataProtectionKeyStatus(app, keyRingPath);
+
+try
+{
+    await SeedIdentityAsync(app, app.Logger);
+}
+catch (Exception ex)
+{
+    app.Logger.LogCritical(ex, "Application startup failed during migration/seed execution.");
+    throw;
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -105,7 +115,7 @@ app.MapAdditionalIdentityEndpoints();
 
 app.Run();
 
-static async Task SeedIdentityAsync(WebApplication app)
+static async Task SeedIdentityAsync(WebApplication app, ILogger logger)
 {
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
@@ -113,17 +123,21 @@ static async Task SeedIdentityAsync(WebApplication app)
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
     var configuration = scope.ServiceProvider.GetRequiredService<IConfiguration>();
 
+    logger.LogInformation("Startup: beginning database migration and identity/case seed process.");
+
     var migrationAttempts = 0;
     while (true)
     {
         try
         {
             await dbContext.Database.MigrateAsync();
+            logger.LogInformation("Startup: database migrations applied successfully.");
             break;
         }
-        catch when (migrationAttempts < 5)
+        catch (Exception ex) when (migrationAttempts < 5)
         {
             migrationAttempts++;
+            logger.LogWarning(ex, "Startup: migration attempt {Attempt} failed. Retrying in 5 seconds.", migrationAttempts);
             await Task.Delay(TimeSpan.FromSeconds(5));
         }
     }
@@ -156,17 +170,19 @@ static async Task SeedIdentityAsync(WebApplication app)
         }
     }
 
-    await SeedIdentityUserAsync(userManager, adminEmail, adminPassword, "Admin", "seeded admin user");
-    await SeedIdentityUserAsync(userManager, configuration["SEED_USER_EMAIL"], configuration["SEED_USER_PASSWORD"], "User", "seeded user");
-    await SeedIdentityUserAsync(userManager, configuration["SEED_STAFF_EMAIL"], configuration["SEED_STAFF_PASSWORD"], "Staff", "seeded staff user");
+    await SeedIdentityUserAsync(userManager, adminEmail, adminPassword, "Admin", "seeded admin user", logger);
+    await SeedIdentityUserAsync(userManager, configuration["SEED_USER_EMAIL"], configuration["SEED_USER_PASSWORD"], "User", "seeded user", logger);
+    await SeedIdentityUserAsync(userManager, configuration["SEED_STAFF_EMAIL"], configuration["SEED_STAFF_PASSWORD"], "Staff", "seeded staff user", logger);
 
-    await SeedSampleCasesAsync(dbContext, userManager, configuration);
+    await SeedSampleCasesAsync(dbContext, userManager, configuration, logger);
+    logger.LogInformation("Startup: identity and sample case seed process completed.");
 }
 
 static async Task SeedSampleCasesAsync(
     ApplicationDbContext dbContext,
     UserManager<ApplicationUser> userManager,
-    IConfiguration configuration)
+    IConfiguration configuration,
+    ILogger logger)
 {
     var creatorEmails = new[]
     {
@@ -189,6 +205,7 @@ static async Task SeedSampleCasesAsync(
     creatorUser ??= await userManager.Users.FirstOrDefaultAsync();
     if (creatorUser is null)
     {
+        logger.LogWarning("Startup seed: no users available to assign as sample case creators. Skipping sample case seed.");
         return;
     }
 
@@ -255,11 +272,13 @@ static async Task SeedSampleCasesAsync(
 
     if (await dbContext.Cases.AnyAsync())
     {
+        logger.LogInformation("Startup seed: sample cases already exist. Skipping sample case insert.");
         return;
     }
 
     dbContext.Cases.AddRange(sampleCases);
     await dbContext.SaveChangesAsync();
+    logger.LogInformation("Startup seed: inserted {CaseCount} sample cases.", sampleCases.Length);
 }
 
 static async Task SeedIdentityUserAsync(
@@ -267,10 +286,12 @@ static async Task SeedIdentityUserAsync(
     string? email,
     string? password,
     string role,
-    string userDescription)
+    string userDescription,
+    ILogger logger)
 {
     if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
     {
+        logger.LogInformation("Startup seed: missing credentials for {UserDescription}; skipping.", userDescription);
         return;
     }
 
@@ -310,5 +331,32 @@ static async Task SeedIdentityUserAsync(
         {
             throw new InvalidOperationException($"Failed to add {userDescription} '{email}' to role '{role}': {string.Join(", ", addToRoleResult.Errors.Select(e => e.Description))}");
         }
+    }
+}
+
+static void LogDataProtectionKeyStatus(WebApplication app, string? keyRingPath)
+{
+    if (string.IsNullOrWhiteSpace(keyRingPath))
+    {
+        app.Logger.LogWarning("Startup: DataProtection key ring path is not configured. Keys may be ephemeral.");
+        return;
+    }
+
+    try
+    {
+        var directoryExists = Directory.Exists(keyRingPath);
+        var keyFileCount = directoryExists
+            ? Directory.GetFiles(keyRingPath, "key-*.xml", SearchOption.TopDirectoryOnly).Length
+            : 0;
+
+        app.Logger.LogInformation(
+            "Startup: DataProtection key ring path '{KeyRingPath}' exists={DirectoryExists}, keyFiles={KeyFileCount}.",
+            keyRingPath,
+            directoryExists,
+            keyFileCount);
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "Startup: unable to inspect DataProtection key ring path '{KeyRingPath}'.", keyRingPath);
     }
 }
