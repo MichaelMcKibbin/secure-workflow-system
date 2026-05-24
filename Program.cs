@@ -107,6 +107,11 @@ app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
    .AllowAnonymous();
 
 app.MapStaticAssets();
+app.UseStaticFiles();
+
+app.UseAuthentication();
+app.UseAuthorization();
+app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
