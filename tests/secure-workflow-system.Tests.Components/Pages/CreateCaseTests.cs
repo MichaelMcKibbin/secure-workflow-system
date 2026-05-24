@@ -10,6 +10,7 @@ using Xunit;
 
 namespace secure_workflow_system.Tests.Components.Pages;
 
+[Obsolete]
 public class CreateCaseTests : TestContext
 {
     private readonly Mock<ICaseService> _caseServiceMock = new();
