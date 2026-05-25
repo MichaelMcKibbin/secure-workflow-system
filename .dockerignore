@@ -6,3 +6,6 @@
 *.suo
 *.log
 *.md
+.gitignore
+Dockerfile
+docker-compose*.yml

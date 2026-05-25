@@ -22,6 +22,11 @@ RUN dotnet publish secure-workflow-system.csproj \
     -o /app/publish \
     --no-restore
 
+
+# Temporary Check after publish
+RUN find /app/publish -path "*_framework*" -maxdepth 5 -print || true
+RUN test -f /app/publish/wwwroot/_framework/blazor.web.js
+
 # =========================
 # Runtime stage
 # =========================
