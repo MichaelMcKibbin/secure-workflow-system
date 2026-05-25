@@ -28,7 +28,6 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("RequireAdmin", p => p.RequireRole("Admin"));
     options.AddPolicy("RequireStaff", p => p.RequireRole("Admin", "Staff"));
-
     options.AddPolicy("CanCreateCase", p => p.RequireRole("User", "Admin"));
     options.AddPolicy("CanViewCases", p => p.RequireRole("User", "Staff", "Admin"));
     options.AddPolicy("CanManageCases", p => p.RequireRole("Staff", "Admin"));
@@ -102,14 +101,11 @@ app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages:
 // app.UseHttpsRedirection();
 
 app.UseAntiforgery();
+app.MapStaticAssets();
+app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
    .AllowAnonymous();
-
-app.MapStaticAssets();
-
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
 
 app.MapAdditionalIdentityEndpoints();
 
