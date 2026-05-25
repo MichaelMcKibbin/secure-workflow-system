@@ -5,8 +5,9 @@ WORKDIR /src
 # Copy solution + project files first for caching and a correct restore context
 COPY secure-workflow-system.slnx ./
 COPY secure-workflow-system.csproj ./
-# COPY secure-workflow-system.Tests.Components/secure-workflow-system.Tests.Components.csproj ./========== Build completed at 21:06 and took 00.067 seconds ==========.Components/
-# COPY secure-workflow-system.Tests.Unit/secure-workflow-system.Tests.Unit.csproj ./secure-workflow-system.Tests.Unit/
+
+# Copy the rest of the repo
+COPY . .
 
 # Show environment and installed sdks/runtimes (diagnostic)
 RUN dotnet --info || true
@@ -17,16 +18,13 @@ RUN ls -la /usr/share/dotnet/sdk || true
 # Restore the entire solution (increase verbosity if you need more detail)
 RUN dotnet restore secure-workflow-system.slnx --verbosity minimal
 
-# Copy the rest of the repo
-COPY . .
-
 # Before publish: re-check dotnet info and SDK folders (diagnostic)
 RUN dotnet --info
 RUN ls -la /usr/share/dotnet/sdk || true
 
 # Publish the app (no-restore because we already restored)
 # If this fails, change --verbosity to diagnostic to capture more details:
-RUN dotnet publish secure-workflow-system.csproj -c Release -o /app/publish --no-restore
+RUN dotnet publish secure-workflow-system.slnx -c Release -o /app/publish --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
