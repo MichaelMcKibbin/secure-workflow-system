@@ -142,9 +142,9 @@ dotnet ef migrations add <MigrationName>
 - deployment automation works
 - containerisation works
 
-The 'Create Case' issue is specifically tied to Blazor static web assets in this deployment/build combination - a very specific framework/build problem.
+The `Create Case` issue is specifically tied to Blazor static web assets in this deployment/build combination - a very specific framework/build problem.
 
-The plan is to address this by starting a fresh version. 
+The plan is to address this by starting a fresh version.
 
 A clean rebuild after everything learned during this project would likely take a fraction of the time and be much cleaner architecturally:
 
