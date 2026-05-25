@@ -23,6 +23,7 @@ RUN dotnet workload list
 # Publish the application project only
 RUN dotnet publish secure-workflow-system.csproj \
     -c Release \
+    --no-restore \
     -o /app/publish
 
 
