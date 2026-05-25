@@ -135,12 +135,12 @@ dotnet ef migrations add <MigrationName>
 - The VPS works
 - Traefik works
 - HTTPS works
-- authentication works
+- Authentication works
 - PostgreSQL works
 - EF Core works
-- the app itself runs
-- deployment automation works
-- containerisation works
+- The app itself runs
+- Deployment automation works
+- Containerisation works
 
 The `Create Case` issue is specifically tied to Blazor static web assets in this deployment/build combination - a very specific framework/build problem.
 
