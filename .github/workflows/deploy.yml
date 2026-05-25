@@ -60,7 +60,8 @@ jobs:
         with:
           context: .
           push: true
-          no-cache: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
           tags: |
             ghcr.io/michaelmckibbin/secure-workflow-system:sha-${{ github.sha }}
 
