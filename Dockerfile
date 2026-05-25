@@ -23,7 +23,7 @@ RUN dotnet workload list
 # Publish the application project only
 RUN dotnet publish secure-workflow-system.csproj \
     -c Release \
-    -o /app/publish \
+    -o /app/publish
 
 
 # Temporary Check after publish
