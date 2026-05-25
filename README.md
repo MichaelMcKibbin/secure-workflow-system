@@ -161,7 +161,7 @@ Pin framework versions deliberately
 
 ### Recommendations:
 
-Use stable LTS tooling only unless you specific preview features are needed.
+Use stable LTS tooling only unless you need specific preview features.
 Probably:
 - .NET 9 LTS
 - standard Blazor Server or Blazor Web App template
