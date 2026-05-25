@@ -10,11 +10,11 @@ WORKDIR /src
 # Copy project file first for Docker layer caching
 COPY secure-workflow-system.csproj ./
 
-# Restore only the application project
-RUN dotnet restore secure-workflow-system.csproj --verbosity minimal
-
 # Copy the remainder of the source
 COPY . .
+
+# Restore only the application project
+RUN dotnet restore secure-workflow-system.csproj --verbosity minimal
 
 # temporary check
 RUN dotnet --info
@@ -24,7 +24,6 @@ RUN dotnet workload list
 RUN dotnet publish secure-workflow-system.csproj \
     -c Release \
     -o /app/publish \
-    --no-restore
 
 
 # Temporary Check after publish
