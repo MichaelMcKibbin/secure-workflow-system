@@ -128,3 +128,41 @@ dotnet ef migrations add <MigrationName>
 - Case status options currently available in UI:
   - `New`, `Assigned`, `In Progress`, `Resolved`, `Closed`
 - Error handling is intentionally simple and user-friendly at this stage.
+
+
+## State of Development
+
+- The VPS works
+- Traefik works
+- HTTPS works
+- authentication works
+- PostgreSQL works
+- EF Core works
+- the app itself runs
+- deployment automation works
+- containerisation works
+
+The 'Create Case' issue is specifically tied to Blazor static web assets in this deployment/build combination - a very specific framework/build problem.
+
+The plan is to address this by starting a fresh version. 
+
+A clean rebuild after everything learned during this project would likely take a fraction of the time and be much cleaner architecturally:
+
+### Start from a stable template
+Pin framework versions deliberately
+
+#### Decide between:
+- Blazor Server
+- Blazor Web App
+- SSR + interactive
+- keep CI/CD minimal initially
+- separate tests from deploy pipelines from day one
+- add features incrementally with checkpoints/tags
+
+### Recommendations:
+
+Use stable LTS tooling only unless you specific preview features are needed.
+Probably:
+- .NET 9 LTS
+- standard Blazor Server or Blazor Web App template
+- avoid template-generated passkey or experimental identity features initially
