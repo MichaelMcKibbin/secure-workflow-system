@@ -135,16 +135,16 @@ dotnet ef migrations add <MigrationName>
 - The VPS works
 - Traefik works
 - HTTPS works
-- authentication works
+- Authentication works
 - PostgreSQL works
 - EF Core works
-- the app itself runs
-- deployment automation works
-- containerisation works
+- The app itself runs
+- Deployment automation works
+- Containerisation works
 
-The 'Create Case' issue is specifically tied to Blazor static web assets in this deployment/build combination - a very specific framework/build problem.
+The `Create Case` issue is specifically tied to Blazor static web assets in this deployment/build combination - a very specific framework/build problem.
 
-The plan is to address this by starting a fresh version. 
+The plan is to address this by starting a fresh version.
 
 A clean rebuild after everything learned during this project would likely take a fraction of the time and be much cleaner architecturally:
 
@@ -161,7 +161,7 @@ Pin framework versions deliberately
 
 ### Recommendations:
 
-Use stable LTS tooling only unless you specific preview features are needed.
+Use stable LTS tooling only unless you need specific preview features.
 Probably:
 - .NET 9 LTS
 - standard Blazor Server or Blazor Web App template
