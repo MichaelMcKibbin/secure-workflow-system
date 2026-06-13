@@ -49,12 +49,17 @@ These secrets are used in `.github/workflows/deploy.yml` and referenced as `${{ 
 	username: ${{ secrets.VPS_USER }}
 	key: ${{ secrets.VPS_SSH_KEY }}
 	script: |
-	  cd /docker/secure-workflow-system
-	  echo "IMAGE_SHA=${{ env.IMAGE_SHA }}" > workflow.env
+	  cd /docker/workflow
+	  echo "IMAGE_DIGEST=${{ needs.build-and-push.outputs.image_digest }}" > workflow.env
 	  echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> workflow.env
 	  echo "ConnectionStrings__DefaultConnection=${{ secrets.WORKFLOW_CONNECTION_STRING }}" >> workflow.env
 	  echo "SEED_ADMIN_EMAIL=${{ secrets.SEED_ADMIN_EMAIL }}" >> workflow.env
 	  echo "SEED_ADMIN_PASSWORD=${{ secrets.SEED_ADMIN_PASSWORD }}" >> workflow.env
+	  echo "SEED_USER_EMAIL=${{ secrets.SEED_USER_EMAIL }}" >> workflow.env
+	  echo "SEED_USER_PASSWORD=${{ secrets.SEED_USER_PASSWORD }}" >> workflow.env
+	  echo "SEED_STAFF_EMAIL=${{ secrets.SEED_STAFF_EMAIL }}" >> workflow.env
+	  echo "SEED_STAFF_PASSWORD=${{ secrets.SEED_STAFF_PASSWORD }}" >> workflow.env
+	  echo "DataProtection__KeyRingPath=/home/app/.aspnet/DataProtection-Keys" >> workflow.env
 ```
 
 ---
@@ -71,11 +76,16 @@ The deploy workflow writes to `workflow.env`:
 
 ```sh
 # Generated from GitHub secrets during deploy step
-IMAGE_SHA=abc123def456...
+IMAGE_DIGEST=sha256:abc123def456...
 POSTGRES_PASSWORD=<from secrets.POSTGRES_PASSWORD>
 ConnectionStrings__DefaultConnection=<from secrets.WORKFLOW_CONNECTION_STRING>
 SEED_ADMIN_EMAIL=<from secrets.SEED_ADMIN_EMAIL>
 SEED_ADMIN_PASSWORD=<from secrets.SEED_ADMIN_PASSWORD>
+SEED_USER_EMAIL=<from secrets.SEED_USER_EMAIL>
+SEED_USER_PASSWORD=<from secrets.SEED_USER_PASSWORD>
+SEED_STAFF_EMAIL=<from secrets.SEED_STAFF_EMAIL>
+SEED_STAFF_PASSWORD=<from secrets.SEED_STAFF_PASSWORD>
+DataProtection__KeyRingPath=/home/app/.aspnet/DataProtection-Keys
 ```
 
 ### Optional Variables
@@ -94,11 +104,11 @@ You can also add these to `workflow.env` on the VPS if needed:
 
 ```bash
 # GitHub Actions runs this during deploy:
-cd /docker/secure-workflow-system
-echo "IMAGE_SHA=${{ env.IMAGE_SHA }}" > workflow.env
+cd /docker/workflow
+echo "IMAGE_DIGEST=${{ needs.build-and-push.outputs.image_digest }}" > workflow.env
 echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> workflow.env
+echo "ConnectionStrings__DefaultConnection=${{ secrets.WORKFLOW_CONNECTION_STRING }}" >> workflow.env
 # ... more appends ...
-
 # Then pulls and runs containers
 docker compose -p workflow --env-file workflow.env pull
 docker compose -p workflow --env-file workflow.env up -d
@@ -114,7 +124,7 @@ cd /docker/secure-workflow-system
 
 # Create workflow.env manually (not recommended - use GitHub secrets instead)
 cat > workflow.env << EOF
-IMAGE_SHA=latest
+IMAGE_DIGEST=sha256:latest
 POSTGRES_PASSWORD=YourSecurePassword123!
 ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=secure_workflow_system;Username=postgres;Password=YourSecurePassword123!
 SEED_ADMIN_EMAIL=admin@example.com
@@ -202,10 +212,16 @@ The compose file expects these variables to be available:
 ```yaml
 services:
   workflow:
-	image: ghcr.io/michaelmckibbin/secure-workflow-system:sha-${IMAGE_SHA:-latest}
+	image: ghcr.io/michaelmckibbin/secure-workflow-system@${IMAGE_DIGEST:?IMAGE_DIGEST must be set to a valid image digest}
+	restart: unless-stopped
+	depends_on:
+	  postgres:
+		condition: service_healthy
 	environment:
 	  ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
-	  ConnectionStrings__DefaultConnection: Host=postgres;...;Password=${POSTGRES_PASSWORD}
+	  ASPNETCORE_URLS: http://+:8080
+	  DATA_PROTECTION_KEY_RING_PATH: /home/app/.aspnet/DataProtection-Keys
+	  ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=${POSTGRES_DB:-secure_workflow_system};Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
 	  SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL}
 	  SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD}
 
