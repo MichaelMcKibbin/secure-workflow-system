@@ -127,7 +127,7 @@ sha256:<previous_digest>
 Note: Set this value as IMAGE_DIGEST=sha256:<previous_digest> in the workflow.env file (see step 3).
 2. SSH into the VPS
 ssh <user>@<server>
-cd /docker/secure-workflow-system
+cd /docker/workflow
 3. Update Deployment Environment File
 
 Edit the workflow.env file and set IMAGE_DIGEST to the previous digest.
