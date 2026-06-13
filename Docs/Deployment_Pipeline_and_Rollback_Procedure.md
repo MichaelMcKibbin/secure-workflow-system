@@ -64,12 +64,13 @@ ghcr.io/michaelmckibbin/secure-workflow-system:latest
 ghcr.io/michaelmckibbin/secure-workflow-system@sha256:<digest>
 2. Generate VPS Environment File
 
-The deployment workflow generates a workflow.env file on the VPS containing deployment variables and secrets.
+The deployment workflow generates a workflow.env file on the VPS containing deployment variables and secrets. The Docker Compose configuration expects an immutable image digest (sha256:...) in IMAGE_DIGEST and Postgres runtime variables (POSTGRES_PASSWORD, POSTGRES_USER, POSTGRES_DB). Example workflow.env:
 
 Example Variables
-IMAGE_REF=ghcr.io/michaelmckibbin/secure-workflow-system@sha256:<digest>
-
+IMAGE_DIGEST=sha256:<digest>
 POSTGRES_PASSWORD=<redacted>
+POSTGRES_USER=postgres
+POSTGRES_DB=secure_workflow_system
 
 SEED_ADMIN_EMAIL=<redacted>
 SEED_ADMIN_PASSWORD=<redacted>
@@ -121,16 +122,18 @@ GitHub Actions deployment logs
 GHCR package history
 Docker image history on the VPS
 Example
-ghcr.io/michaelmckibbin/secure-workflow-system@sha256:<previous_digest>
+sha256:<previous_digest>
+
+Note: Set this value as IMAGE_DIGEST=sha256:<previous_digest> in the workflow.env file (see step 3).
 2. SSH into the VPS
 ssh <user>@<server>
-cd /docker/workflow
+cd /docker/secure-workflow-system
 3. Update Deployment Environment File
 
-Edit the workflow.env file.
+Edit the workflow.env file and set IMAGE_DIGEST to the previous digest.
 
 Example
-IMAGE_REF=ghcr.io/michaelmckibbin/secure-workflow-system@sha256:<previous_digest>
+IMAGE_DIGEST=sha256:<previous_digest>
 4. Pull and Redeploy Previous Image
 docker compose -p workflow --env-file workflow.env pull
 docker compose -p workflow --env-file workflow.env up -d --force-recreate
