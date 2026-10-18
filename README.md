@@ -141,13 +141,17 @@ dotnet ef migrations add <MigrationName>
 - The app itself runs
 - Deployment automation works
 - Containerisation works
+- Blazor static web assets work
 
-The `Create Case` issue is specifically tied to Blazor static web assets in this deployment/build combination - a very specific framework/build problem.
+## Troubleshooting Blazor Static Web Assets
 
-The plan is to address this after the examination results release date - June 15th 2026.
+Part way through the project, it was discovered that the Blazor static web assets were no longer being served correctly in the production environment.  
 
-It will involve implemention using .NET 8.x and associated dependencies to test if the older Blazor.web.js deployment method works with the current pipeline and cloud hosting setup.
+The issue was traced back to the `UseStaticWebAssets` middleware not being invoked in the production build.  
 
-A clean rebuild after everything learned during this project would likely take a fraction of the time and be much cleaner architecturally:
+An extensive investigation was conducted, including a separate test project to isolate the issue.  
+
+Simplifying the build and deployment pipeline and processes, removing --no-restore, adding a run test of Blazor components generation proved to be the changes necessary to restore the Blazor functionality on the live deployment.  
 
 
+Updating NuGet packages, and the .NET SDK was also carried out, but these were not the root cause of the issue.
