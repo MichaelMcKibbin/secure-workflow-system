@@ -31,6 +31,8 @@ RUN dotnet publish secure-workflow-system.csproj \
 RUN echo "Published _framework files:" && find /app/publish -path "*_framework*" -print || true
 RUN echo "Published files containing blazor:" && find /app/publish -iname "*blazor*" -print || true
 RUN echo "Static web asset manifest blazor entries:" && grep -i "blazor.web" /app/publish/*.staticwebassets*.json || true
+RUN test -f /app/publish/wwwroot/_framework/blazor.web.js \
+    || (echo "ERROR: Blazor JavaScript missing from publish output" && exit 1)
 
 # =========================
 # Runtime stage
