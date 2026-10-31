@@ -28,6 +28,21 @@
             <hr />
             <ValidationSummary class="text-danger" role="alert" />
             <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.FullName" id="Input.FullName" class="form-control" autocomplete="name" aria-required="true" placeholder="Full name" />
+                <label for="Input.FullName">Full name</label>
+                <ValidationMessage For="() => Input.FullName" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
+                <InputText @bind-Value="Input.Company" id="Input.Company" class="form-control" autocomplete="organization" aria-required="true" placeholder="Company / organisation" />
+                <label for="Input.Company">Company / organisation</label>
+                <ValidationMessage For="() => Input.Company" class="text-danger" />
+            </div>
+            <div class="mb-3">
+                <label for="Input.AccessReason" class="form-label">Reason for requesting access</label>
+                <InputTextArea @bind-Value="Input.AccessReason" id="Input.AccessReason" class="form-control" rows="3" aria-required="true" />
+                <ValidationMessage For="() => Input.AccessReason" class="text-danger" />
+            </div>
+            <div class="form-floating mb-3">
                 <InputText @bind-Value="Input.Email" id="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
                 <label for="Input.Email">Email</label>
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
@@ -79,6 +94,10 @@
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
         user.EmailConfirmed = false;
         user.IsApproved = false;
+        user.FullName = Input.FullName.Trim();
+        user.Company = Input.Company.Trim();
+        user.AccessReason = Input.AccessReason.Trim();
+        user.RegisteredAtUtc = DateTime.UtcNow;
 
         var result = await UserManager.CreateAsync(user, Input.Password);
 
@@ -128,6 +147,21 @@
 
     private sealed class InputModel
     {
+        [Required]
+        [StringLength(100)]
+        [Display(Name = "Full name")]
+        public string FullName { get; set; } = "";
+
+        [Required]
+        [StringLength(150)]
+        [Display(Name = "Company / organisation")]
+        public string Company { get; set; } = "";
+
+        [Required]
+        [StringLength(1000, MinimumLength = 10)]
+        [Display(Name = "Reason for access")]
+        public string AccessReason { get; set; } = "";
+
         [Required]
         [EmailAddress]
         [Display(Name = "Email")]

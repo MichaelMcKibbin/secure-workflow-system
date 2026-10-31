@@ -39,7 +39,10 @@ else
                 <table class="table table-striped">
                     <thead>
                         <tr>
+                            <th>Name</th>
+                            <th>Company</th>
                             <th>Email</th>
+                            <th>Requested</th>
                             <th>Email Confirmed</th>
                             <th>Action</th>
                         </tr>
@@ -48,7 +51,10 @@ else
                         @foreach (var row in _pendingRows)
                         {
                             <tr>
+                                <td>@(row.FullName ?? "—")</td>
+                                <td>@(row.Company ?? "—")</td>
                                 <td>@row.Email</td>
+                                <td>@(row.RegisteredAtUtc is { } reg ? $"{reg:g} UTC" : "—")</td>
                                 <td>
                                     @if (row.EmailConfirmed)
                                     {
@@ -61,6 +67,12 @@ else
                                 </td>
                                 <td>
                                     <button class="btn btn-sm btn-success" @onclick="() => ApproveUserAsync(row.UserId)">✓ Approve</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="6" class="small">
+                                    <strong>Reason for access:</strong>
+                                    <span style="white-space: pre-wrap;">@(row.AccessReason ?? "Not provided")</span>
                                 </td>
                             </tr>
                         }
@@ -174,6 +186,10 @@ else
                 UserId = user.Id,
                 Email = user.Email ?? user.UserName ?? user.Id,
                 EmailConfirmed = user.EmailConfirmed,
+                FullName = user.FullName,
+                Company = user.Company,
+                AccessReason = user.AccessReason,
+                RegisteredAtUtc = user.RegisteredAtUtc,
                 CurrentRolesDisplay = appRoles.Count > 0 ? string.Join(", ", appRoles) : "None",
                 SelectedRole = appRoles.Contains("Admin")
                     ? "Admin"
@@ -299,6 +315,10 @@ else
         public string UserId { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public bool EmailConfirmed { get; set; }
+        public string? FullName { get; set; }
+        public string? Company { get; set; }
+        public string? AccessReason { get; set; }
+        public DateTime? RegisteredAtUtc { get; set; }
         public string CurrentRolesDisplay { get; set; } = "None";
         public string SelectedRole { get; set; } = "User";
     }

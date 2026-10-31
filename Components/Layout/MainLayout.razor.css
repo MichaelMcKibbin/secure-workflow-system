@@ -9,7 +9,7 @@ main {
 }
 
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    background-image: linear-gradient(180deg, #25338a 0%, #051b37 70%);
 }
 
 .top-row {
@@ -19,6 +19,11 @@ main {
     height: 3.5rem;
     display: flex;
     align-items: center;
+}
+
+[data-bs-theme="dark"] .top-row {
+    background-color: var(--color-background-light);
+    border-bottom-color: var(--color-border);
 }
 
     .top-row ::deep a, .top-row ::deep .btn-link {

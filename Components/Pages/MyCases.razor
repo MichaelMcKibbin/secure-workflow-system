@@ -148,12 +148,12 @@ else
     {
         return status switch
         {
-            secure_workflow_system.Data.WorkflowState.New => "open",
-            secure_workflow_system.Data.WorkflowState.Assigned => "pending",
-            secure_workflow_system.Data.WorkflowState.InProgress => "pending",
-            secure_workflow_system.Data.WorkflowState.Resolved => "closed",
+            secure_workflow_system.Data.WorkflowState.New => "new",
+            secure_workflow_system.Data.WorkflowState.Assigned => "assigned",
+            secure_workflow_system.Data.WorkflowState.InProgress => "inprogress",
+            secure_workflow_system.Data.WorkflowState.Resolved => "resolved",
             secure_workflow_system.Data.WorkflowState.Closed => "closed",
-            _ => "open"
+            _ => "new"
         };
     }
 
@@ -161,11 +161,11 @@ else
     {
         return status switch
         {
-            secure_workflow_system.Data.WorkflowState.New => "badge-info",
-            secure_workflow_system.Data.WorkflowState.Assigned => "badge-warning",
-            secure_workflow_system.Data.WorkflowState.InProgress => "badge-warning",
-            secure_workflow_system.Data.WorkflowState.Resolved => "badge-success",
-            secure_workflow_system.Data.WorkflowState.Closed => "badge-danger",
+            secure_workflow_system.Data.WorkflowState.New => "badge-new",
+            secure_workflow_system.Data.WorkflowState.Assigned => "badge-assigned",
+            secure_workflow_system.Data.WorkflowState.InProgress => "badge-inprogress",
+            secure_workflow_system.Data.WorkflowState.Resolved => "badge-resolved",
+            secure_workflow_system.Data.WorkflowState.Closed => "badge-closed",
             _ => "badge-secondary"
         };
     }

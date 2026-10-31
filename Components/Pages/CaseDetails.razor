@@ -337,11 +337,11 @@ else
     {
         var badgeClass = status switch
         {
-            secure_workflow_system.Data.WorkflowState.New => "badge badge-info",
-            secure_workflow_system.Data.WorkflowState.Assigned => "badge badge-info",
-            secure_workflow_system.Data.WorkflowState.InProgress => "badge badge-warning",
-            secure_workflow_system.Data.WorkflowState.Resolved => "badge badge-success",
-            secure_workflow_system.Data.WorkflowState.Closed => "badge badge-danger",
+            secure_workflow_system.Data.WorkflowState.New => "badge badge-new",
+            secure_workflow_system.Data.WorkflowState.Assigned => "badge badge-assigned",
+            secure_workflow_system.Data.WorkflowState.InProgress => "badge badge-inprogress",
+            secure_workflow_system.Data.WorkflowState.Resolved => "badge badge-resolved",
+            secure_workflow_system.Data.WorkflowState.Closed => "badge badge-closed",
             _ => "badge badge-secondary"
         };
 

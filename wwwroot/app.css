@@ -3,6 +3,7 @@
    ============================================ */
 :root {
     /* Primary Brand Colors */
+    --color-background: white;
     --color-twilight-indigo: #2b3a67;
     --color-blue-slate: #496a81;
     --color-pacific-blue: #66999b;
@@ -10,12 +11,12 @@
     --color-peach-glow: #ffc482;
 
     /* Semantic Color Roles */
-    --color-primary: var(--color-twilight-indigo);
-    --color-primary-dark: #1f2847;
-    --color-primary-light: #434d6f;
+    --color-primary: #055b99;
+    --color-primary-dark: #28345c;
+    --color-primary-light: #213a8b;
 
-    --color-secondary: var(--color-blue-slate);
-    --color-secondary-dark: #354a5f;
+    --color-secondary: #6585bd;
+    --color-secondary-dark: #43505e;
     --color-secondary-light: #5f7a92;
 
     --color-accent: var(--color-pacific-blue);
@@ -29,6 +30,10 @@
     --color-highlight: var(--color-peach-glow);
     --color-highlight-dark: #ffb758;
     --color-highlight-light: #ffd4a3;
+
+    --card-header-start: var(--color-primary-light);
+    --card-header-end: var(--color-secondary-light);
+    --card-header-border: var(--color-accent);
 
     /* Status Colors (Complementary) */
     --color-success: #6ba587;
@@ -54,8 +59,32 @@
     --color-background-lighter: #f5f5f5;
 }
 
+[data-bs-theme="dark"] {
+    --color-text-primary: #e2e6ef;
+    --color-text-secondary: #aab8c8;
+    --color-text-muted: #9aa3ab;
+    --color-border: #3a4150;
+    --color-border-dark: #555d6e;
+    --color-background: #1a1d24;
+    --color-background-light: #22262f;
+    --color-background-lighter: #423d3d;
+    --color-secondary: #8fb0e0;
+    --card-header-start: var(--color-primary-dark);
+    --card-header-end: var(--color-secondary-dark);
+    --card-header-border: var(--color-accent-light);
+}
+
+.theme-toggle .theme-icon-light,
+[data-bs-theme="dark"] .theme-toggle .theme-icon-dark {
+    display: none;
+}
+
+[data-bs-theme="dark"] .theme-toggle .theme-icon-light {
+    display: inline;
+}
+
 html, body {
-    font-family: Calibri, Helvetica, Arial, sans-serif;
+    font-family
     color: var(--color-text-primary);
     background-color: var(--color-background);
 }
@@ -208,7 +237,7 @@ h1:focus {
 }
 
 .navbar-dark {
-    background-color: var(--color-primary) !important;
+    background-color: #28345c !important;
 }
 
 .navbar-brand {
@@ -229,13 +258,24 @@ h1:focus {
 }
 
 .card {
-    border-color: var(--color-border);
+    border-color: #6ba587;
+    color: var(--color-text-primary);
 }
 
 .card-header {
-    background-color: var(--color-background-light);
-    border-color: var(--color-border);
-    color: var(--color-primary);
+    background: linear-gradient(90deg, var(--card-header-start) 0%, var(--card-header-end) 100%);
+    border-bottom: 3px solid var(--card-header-border);
+
+}
+.card-header .card-title {
+    color: #b3af8f;
+    margin-bottom: 0;
+}
+
+[data-bs-theme="dark"] .card-header {
+    background: linear-gradient(90deg, var(--color-primary-dark) 0%, var(--color-secondary-dark) 100%);
+    border-bottom-color: var(--color-accent-light);
+    color: var(--color-text-primary);
 }
 
 /* Utility Classes */

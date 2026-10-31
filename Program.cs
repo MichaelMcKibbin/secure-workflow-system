@@ -107,6 +107,14 @@ app.MapRazorComponents<App>().AddInteractiveServerRenderMode();
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }))
    .AllowAnonymous();
 
+app.MapGet("/docs/fyp-report.pdf", (IWebHostEnvironment env) =>
+{
+    var file = env.ContentRootFileProvider.GetFileInfo("Docs/SecFlo_FYP_Report_web.pdf");
+    return file.Exists
+        ? Results.File(file.CreateReadStream(), "application/pdf", enableRangeProcessing: true)
+        : Results.NotFound();
+}).AllowAnonymous();
+
 app.MapAdditionalIdentityEndpoints();
 
 app.Run();

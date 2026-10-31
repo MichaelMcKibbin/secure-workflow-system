@@ -1,6 +1,8 @@
-/* ============================================
+﻿/* ============================================
    Enhanced Component Styles
    Secure Workflow System
+   
+   (see app.css also)
    ============================================ */
 
 /* ============================================
@@ -8,7 +10,7 @@
    ============================================ */
 .hero-section {
     background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
-    color: white;
+    color: #fff;
     padding: 4rem 2rem;
     margin-bottom: 2rem;
     border-radius: 0.5rem;
@@ -28,23 +30,64 @@
     margin-bottom: 1.5rem;
 }
 
+[data-bs-theme="dark"] .hero-section {
+    background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-secondary-dark) 100%);
+}
+
+/* Hero buttons: sit on a dark gradient in both themes, so colours are fixed for contrast */
+.btn-hero,
+.btn-hero-outline {
+    font-weight: 500;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.btn-hero {
+    background-color: var(--color-highlight);
+    border-color: var(--color-highlight);
+    color: #1f2847;
+}
+
+.btn-hero:hover,
+.btn-hero:focus-visible {
+    background-color: var(--color-highlight-light);
+    border-color: var(--color-highlight-light);
+    color: #1f2847;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+}
+
+.btn-hero-outline {
+    background-color: transparent;
+    border-color: #fff;
+    color: #fff;
+}
+
+.btn-hero-outline:hover,
+.btn-hero-outline:focus-visible {
+    background-color: #fff;
+    border-color: #fff;
+    color: var(--color-primary-dark);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+}
+
 /* ============================================
    CARD ENHANCEMENTS
    ============================================ */
 .card {
-    border-left: 4px solid var(--color-accent);
+/*    border-left: 2px solid var(--color-accent);*/
     transition: all 0.3s ease;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
 }
 
 .card:hover {
-    box-shadow: 0 8px 16px rgba(102, 153, 155, 0.15);
+    box-shadow: 0 8px 16px #055b93;
     transform: translateY(-2px);
 }
 
 .card-header {
-    background: linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-secondary-light) 100%);
-    color: white;
+    background: linear-gradient(90deg, var(--color-primary-light) 0%, var(--color-secondary-light) 100%);    
     border-bottom: 3px solid var(--color-accent);
 }
 
@@ -181,12 +224,47 @@
     color: white;
 }
 
+/* Workflow status palette: one distinct hue per state */
+:root {
+    --status-new: #2f6fb3;
+    --status-assigned: #7255b0;
+    --status-inprogress: #e08a1e;
+    --status-resolved: #2e8b57;
+    --status-closed: #5f6b7a;
+}
+
+[data-bs-theme="dark"] {
+    --status-new: #5b9bdc;
+    --status-assigned: #a38be0;
+    --status-inprogress: #f0a83c;
+    --status-resolved: #4fbf84;
+    --status-closed: #8b97a6;
+}
+
+.badge-new { background-color: var(--status-new); color: #fff; }
+.badge-assigned { background-color: var(--status-assigned); color: #fff; }
+.badge-inprogress { background-color: var(--status-inprogress); color: #1f2847; }
+.badge-resolved { background-color: var(--status-resolved); color: #fff; }
+.badge-closed { background-color: var(--status-closed); color: #fff; }
+
+[data-bs-theme="dark"] .badge-new,
+[data-bs-theme="dark"] .badge-assigned,
+[data-bs-theme="dark"] .badge-resolved,
+[data-bs-theme="dark"] .badge-closed {
+    color: #111827;
+}
+
 /* ============================================
    CASE CARDS
    ============================================ */
 .case-card {
-    background: linear-gradient(135deg, rgba(255, 196, 130, 0.05) 0%, rgba(179, 175, 143, 0.05) 100%);
-    border-left: 4px solid var(--color-highlight);
+    --case-surface: #e9eef4;
+    --case-edge: #b8c4d2;
+    --case-tint: rgba(179, 175, 143, 0.12);
+    background: linear-gradient(var(--case-tint), var(--case-tint)), var(--case-surface);
+    border: 1px solid var(--case-edge);
+    border-left: 4px solid var(--color-highlight-dark);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
     padding: 1.5rem;
     margin-bottom: 1rem;
     border-radius: 0.5rem;
@@ -194,25 +272,24 @@
     cursor: pointer;
 }
 
+[data-bs-theme="dark"] .case-card {
+    --case-surface: #2f3542;
+    --case-edge: #4a5365;
+    --case-tint: rgba(255, 196, 130, 0.06);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
 .case-card:hover {
-    box-shadow: 0 6px 12px rgba(255, 196, 130, 0.2);
+    border-color: var(--color-accent);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
     transform: translateX(4px);
 }
 
-.case-card.status-open {
-    border-left-color: var(--color-info);
-    background: linear-gradient(135deg, rgba(102, 153, 155, 0.05) 0%, rgba(102, 153, 155, 0.02) 100%);
-}
-
-.case-card.status-closed {
-    border-left-color: var(--color-success);
-    background: linear-gradient(135deg, rgba(107, 165, 135, 0.05) 0%, rgba(107, 165, 135, 0.02) 100%);
-}
-
-.case-card.status-pending {
-    border-left-color: var(--color-warning);
-    background: linear-gradient(135deg, rgba(232, 155, 60, 0.05) 0%, rgba(232, 155, 60, 0.02) 100%);
-}
+.case-card.status-new { border-left-color: var(--status-new); --case-tint: color-mix(in srgb, var(--status-new) 14%, transparent); }
+.case-card.status-assigned { border-left-color: var(--status-assigned); --case-tint: color-mix(in srgb, var(--status-assigned) 14%, transparent); }
+.case-card.status-inprogress { border-left-color: var(--status-inprogress); --case-tint: color-mix(in srgb, var(--status-inprogress) 14%, transparent); }
+.case-card.status-resolved { border-left-color: var(--status-resolved); --case-tint: color-mix(in srgb, var(--status-resolved) 14%, transparent); }
+.case-card.status-closed { border-left-color: var(--status-closed); --case-tint: color-mix(in srgb, var(--status-closed) 14%, transparent); }
 
 .case-card h5 {
     color: var(--color-primary);
@@ -220,6 +297,9 @@
     font-weight: 600;
 }
 
+[data-bs-theme="dark"] .case-card h5 {
+    color: var(--color-accent-light);
+}
 .case-card .case-meta {
     font-size: 0.9rem;
     color: var(--color-text-secondary);
@@ -437,6 +517,17 @@
     font-size: 0.9rem;
 }
 
+[data-bs-theme="dark"] .layout-toggle .btn-outline-primary {
+    color: var(--color-accent-light);
+    border-color: var(--color-accent-light);
+}
+
+[data-bs-theme="dark"] .layout-toggle .btn-outline-primary:hover {
+    background-color: var(--color-accent-dark);
+    border-color: var(--color-accent-light);
+    color: #fff;
+}
+
 .case-list-row {
     transition: all 0.2s ease;
     cursor: pointer;
@@ -459,5 +550,14 @@
 .case-list-row a:hover {
     color: var(--color-accent);
     text-decoration: underline;
+}
+
+[data-bs-theme="dark"] .case-list-row a,
+[data-bs-theme="dark"] .case-list-row td {
+    color: var(--color-accent-light);
+}
+
+[data-bs-theme="dark"] .case-list-row a:hover {
+    color: var(--color-highlight);
 }
 

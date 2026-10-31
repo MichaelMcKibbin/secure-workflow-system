@@ -107,6 +107,19 @@ Navigation links are role-aware:
 - Create Case: `User`, `Admin`
 - Manage Users: `Admin`
 
+## Case Status Colors
+
+Each workflow state has its own colour, used for status badges and the left edge of case cards.
+Colours are defined as `--status-*` variables in `wwwroot/styles.css`, with separate light and dark theme values.
+
+| State | Light | Dark | Meaning |
+|---|---|---|---|
+| New | blue `#2f6fb3` | `#5b9bdc` | fresh |
+| Assigned | violet `#7255b0` | `#a38be0` | owned, not started |
+| InProgress | amber `#e08a1e` | `#f0a83c` | active work |
+| Resolved | green `#2e8b57` | `#4fbf84` | done, awaiting close |
+| Closed | slate grey `#5f6b7a` | `#8b97a6` | finished/archived |
+
 ## Database / Migrations
 
 Migrations are in `Migrations/`.
